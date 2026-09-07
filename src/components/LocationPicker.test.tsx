@@ -105,4 +105,40 @@ describe('LocationPicker', () => {
       expect.objectContaining({ name: 'Stockholm', latitude: 59.3293, longitude: 18.0686 }),
     )
   })
+
+  it('shows a disabled "Locating…" state while geolocation is pending, to prevent double-taps', async () => {
+    mockGeolocation(() => {
+      // Never resolves — simulates a slow GPS fix.
+    })
+    const user = userEvent.setup()
+
+    render(<LocationPicker onLocationSelected={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: 'Use my location' }))
+
+    const button = screen.getByRole('button', { name: 'Locating…' })
+    expect(button).toBeDisabled()
+  })
+
+  it('lets the user cancel out of "Change location" back to the current location', async () => {
+    localStorage.setItem(
+      'reel-weather:preferences',
+      JSON.stringify({
+        lastLocation: { id: '40,-105', name: 'Boulder', latitude: 40, longitude: -105 },
+        recentLocations: [],
+      }),
+    )
+    const onLocationSelected = vi.fn()
+    const user = userEvent.setup()
+
+    render(<LocationPicker onLocationSelected={onLocationSelected} />)
+    await user.click(screen.getByRole('button', { name: 'Change location' }))
+    expect(screen.getByPlaceholderText('Search for a place...')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    expect(screen.getByText('Boulder')).toBeInTheDocument()
+    expect(screen.queryByPlaceholderText('Search for a place...')).not.toBeInTheDocument()
+    // Cancelling must not re-fire the callback — still just the initial auto-resolve.
+    expect(onLocationSelected).toHaveBeenCalledTimes(1)
+  })
 })

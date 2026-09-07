@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AttributionFooter } from './components/AttributionFooter'
+import { CollapsibleSection } from './components/CollapsibleSection'
 import { ConsensusCard } from './components/ConsensusCard'
 import { FishingCard } from './components/FishingCard'
 import { LocationPicker } from './components/LocationPicker'
@@ -46,8 +47,14 @@ function App() {
         <TemperatureUnitToggle unit={unit} onChange={setUnit} />
         <LocationPicker onLocationSelected={setLocation} />
 
-        {forecast.status === 'loading' && <p>Loading forecast…</p>}
-        {forecast.status === 'error' && <p role="alert">{forecast.message}</p>}
+        {forecast.status === 'loading' && (
+          <p style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>Loading forecast…</p>
+        )}
+        {forecast.status === 'error' && (
+          <p role="alert" style={{ textAlign: 'center', color: 'var(--color-warning)' }}>
+            {forecast.message}
+          </p>
+        )}
 
         {forecast.status === 'success' && location && (
           <>
@@ -58,14 +65,16 @@ function App() {
               agreement={forecast.agreement}
               temperatureUnit={unit}
             />
-            <ModelForecastList
-              models={forecast.selectedModelIds.map((modelId) => ({
-                modelId,
-                name: modelName(modelId),
-                point: forecast.modelsAtNow[modelId],
-              }))}
-              temperatureUnit={unit}
-            />
+            <CollapsibleSection summary={`Forecast models (${forecast.selectedModelIds.length})`}>
+              <ModelForecastList
+                models={forecast.selectedModelIds.map((modelId) => ({
+                  modelId,
+                  name: modelName(modelId),
+                  point: forecast.modelsAtNow[modelId],
+                }))}
+                temperatureUnit={unit}
+              />
+            </CollapsibleSection>
             <FishingCard {...summarizeLightInputs(forecast.modelsAtNow)} />
           </>
         )}

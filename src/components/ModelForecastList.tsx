@@ -11,25 +11,27 @@ export interface ModelForecastListProps {
 /** Section 7.3: compact per-model comparison. */
 export function ModelForecastList({ models, temperatureUnit }: ModelForecastListProps) {
   return (
-    <table className={styles.list}>
-      <thead>
-        <tr>
-          <th>Model</th>
-          <th>Condition</th>
-          <th>Precip</th>
-          <th>Wind</th>
-        </tr>
-      </thead>
-      <tbody>
-        {models.map((m) => (
-          <ModelForecastRow
-            key={m.modelId}
-            name={m.name}
-            point={m.point}
-            temperatureUnit={temperatureUnit}
-          />
-        ))}
-      </tbody>
-    </table>
+    <div className={styles.scroll}>
+      <table className={styles.list}>
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Condition</th>
+            <th>Precip</th>
+            <th>Wind</th>
+          </tr>
+        </thead>
+        <tbody>
+          {models.map((m) => (
+            <ModelForecastRow
+              key={m.modelId}
+              name={m.name}
+              point={m.point}
+              temperatureUnit={temperatureUnit}
+            />
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }

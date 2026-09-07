@@ -1,3 +1,8 @@
+.scroll {
+  /* Safety net on narrow phones — the table itself never forces the page body to scroll horizontally. */
+  overflow-x: auto;
+}
+
 .list {
   width: 100%;
   border-collapse: collapse;

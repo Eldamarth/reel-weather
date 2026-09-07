@@ -83,19 +83,33 @@ export function LocationPicker({ onLocationSelected }: LocationPickerProps) {
   if (!editing && current) {
     return (
       <div className={styles.picker}>
-        <span className={styles.currentLocationName}>{current.name}</span>
-        <button type="button" className={styles.primaryAction} onClick={() => setEditing(true)}>
-          Change location
-        </button>
+        <div className={styles.header}>
+          <span className={styles.currentLocationName}>{current.name}</span>
+          <button type="button" className={styles.primaryAction} onClick={() => setEditing(true)}>
+            Change location
+          </button>
+        </div>
       </div>
     )
   }
 
   return (
     <div className={styles.picker}>
-      <button type="button" className={styles.primaryAction} onClick={requestGeolocation}>
-        Use my location
-      </button>
+      <div className={styles.header}>
+        <button
+          type="button"
+          className={styles.primaryAction}
+          onClick={requestGeolocation}
+          disabled={geoState.status === 'loading'}
+        >
+          {geoState.status === 'loading' ? 'Locating…' : 'Use my location'}
+        </button>
+        {current && (
+          <button type="button" className={styles.cancelAction} onClick={() => setEditing(false)}>
+            Cancel
+          </button>
+        )}
+      </div>
 
       {geoState.status === 'error' && (
         <p className={styles.errorMessage}>{geoState.message} — search for a location instead.</p>
