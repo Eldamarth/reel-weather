@@ -1,91 +1,77 @@
-import { useEffect, useState } from 'react'
-import {
-  demonstrateCombinedRequestHazard,
-  runSpike,
-  type LocationSpikeReport,
-} from './spike/openMeteoSpike'
+import { useState } from 'react'
+import { AttributionFooter } from './components/AttributionFooter'
+import { ConsensusCard } from './components/ConsensusCard'
+import { FishingCard } from './components/FishingCard'
+import { LocationPicker } from './components/LocationPicker'
+import { ModelForecastList } from './components/ModelForecastList'
+import { TemperatureUnitToggle } from './components/TemperatureUnitToggle'
+import { MODEL_REGISTRY } from './config/modelRegistry'
+import { useForecast } from './hooks/useForecast'
+import type { SavedLocation } from './hooks/locationPreferences'
+import { useTemperatureUnit } from './hooks/useTemperatureUnit'
+import { median } from './weather/consensus'
+import type { NormalizedForecastPoint } from './weather/models'
 
-/**
- * Temporary Phase 1 spike harness (plan section 20). This is NOT the app UI —
- * it exists only to prove the fetches work from an actual browser page (real
- * CORS, not curl) and to give a human-readable dump of what each model
- * returned. Replace this component entirely in Phase 3.
- */
+function modelName(modelId: string): string {
+  return MODEL_REGISTRY.find((m) => m.modelId === modelId)?.name ?? modelId
+}
+
+/** Section 12.1/12.2's fishing-rule inputs, summarized across whichever models had data for "now". */
+function summarizeLightInputs(modelsAtNow: Record<string, NormalizedForecastPoint>) {
+  const points = Object.values(modelsAtNow)
+  return {
+    isDay: points.find((p) => p.isDay != null)?.isDay ?? null,
+    cloudCoverPct: median(points.map((p) => p.cloudCoverPct)),
+    shortwaveRadiation: median(points.map((p) => p.shortwaveRadiation ?? null)),
+  }
+}
+
 function App() {
-  const [reports, setReports] = useState<LocationSpikeReport[] | null>(null)
-  const [hazard, setHazard] = useState<{
-    goodOrderParsed: boolean
-    badOrderParsed: boolean
-  } | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    runSpike()
-      .then(setReports)
-      .catch((err) => setError(String(err)))
-    demonstrateCombinedRequestHazard()
-      .then(setHazard)
-      .catch((err) => setError(String(err)))
-  }, [])
+  const [location, setLocation] = useState<SavedLocation | null>(null)
+  const forecast = useForecast(location)
+  const { unit, setUnit } = useTemperatureUnit()
 
   return (
-    <main style={{ padding: '1.5rem', fontFamily: 'monospace', fontSize: '0.85rem' }}>
-      <h1>Reel Weather — Phase 1 API Spike</h1>
-      <p>
-        If model rows below populated without a CORS error in the browser console, direct
-        browser-to-Open-Meteo fetching is confirmed viable.
-      </p>
+    <>
+      <main
+        style={{
+          padding: '1rem',
+          maxWidth: 480,
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+        }}
+      >
+        <TemperatureUnitToggle unit={unit} onChange={setUnit} />
+        <LocationPicker onLocationSelected={setLocation} />
 
-      {error && <p style={{ color: 'salmon' }}>Error: {error}</p>}
+        {forecast.status === 'loading' && <p>Loading forecast…</p>}
+        {forecast.status === 'error' && <p role="alert">{forecast.message}</p>}
 
-      {hazard && (
-        <section style={{ marginBottom: '1.5rem' }}>
-          <h2>Combined-request order hazard</h2>
-          <p>
-            ncep_hrrr_conus,metno_nordic (available model first) parsed:{' '}
-            {String(hazard.goodOrderParsed)}
-          </p>
-          <p>
-            metno_nordic,ncep_hrrr_conus (unavailable model first) parsed:{' '}
-            {String(hazard.badOrderParsed)}
-          </p>
-        </section>
-      )}
-
-      {!reports && !error && <p>Loading…</p>}
-
-      {reports?.map((report) => (
-        <section key={report.location.name} style={{ marginBottom: '2rem' }}>
-          <h2>{report.location.name}</h2>
-          <table border={1} cellPadding={4} style={{ borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th>Model</th>
-                <th>Status</th>
-                <th>Detail</th>
-              </tr>
-            </thead>
-            <tbody>
-              {report.results.map((result) => (
-                <tr key={result.modelId}>
-                  <td>{result.modelId}</td>
-                  <td>{result.status}</td>
-                  <td>
-                    {result.status === 'ok' &&
-                      `horizon=${result.horizonHours}h, lastData=${result.lastNonNullTimestamp}, tz=${result.resolvedTimezone}, missingVars=[${result.missingVariables.join(', ')}]`}
-                    {result.status === 'unavailable-clean' &&
-                      `HTTP ${result.httpStatus}: ${result.reason}`}
-                    {result.status === 'unavailable-malformed-json' &&
-                      `HTTP ${result.httpStatus}, JSON.parse threw — raw: ${result.rawSnippet}`}
-                    {result.status === 'network-error' && result.message}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      ))}
-    </main>
+        {forecast.status === 'success' && location && (
+          <>
+            <ConsensusCard
+              locationName={location.name}
+              timezone={forecast.timezone}
+              consensus={forecast.consensus}
+              agreement={forecast.agreement}
+              temperatureUnit={unit}
+            />
+            <ModelForecastList
+              models={forecast.selectedModelIds.map((modelId) => ({
+                modelId,
+                name: modelName(modelId),
+                point: forecast.modelsAtNow[modelId],
+              }))}
+              temperatureUnit={unit}
+            />
+            <FishingCard {...summarizeLightInputs(forecast.modelsAtNow)} />
+          </>
+        )}
+      </main>
+      <AttributionFooter />
+    </>
   )
 }
 

@@ -1,6 +1,20 @@
 import type { DisplayCondition, NormalizedForecastPoint } from './models'
 import { weatherCodeToCondition } from './weatherCodes'
 
+/** Section 5.2's icon vocabulary — a small, fixed set of emoji regardless of source model. */
+export const CONDITION_DISPLAY: Record<DisplayCondition, { emoji: string; label: string }> = {
+  clear: { emoji: '☀️', label: 'Clear' },
+  'mostly-clear': { emoji: '🌤️', label: 'Mostly clear' },
+  'partly-cloudy': { emoji: '⛅', label: 'Partly cloudy' },
+  cloudy: { emoji: '☁️', label: 'Cloudy' },
+  'light-rain': { emoji: '🌦️', label: 'Light rain' },
+  rain: { emoji: '🌧️', label: 'Rain' },
+  'heavy-rain': { emoji: '🌧️', label: 'Heavy rain' },
+  snow: { emoji: '🌨️', label: 'Snow' },
+  thunderstorm: { emoji: '⛈️', label: 'Thunderstorm' },
+  fog: { emoji: '🌫️', label: 'Fog' },
+}
+
 /** Most severe first — used only to break ties in the plurality vote below. */
 const SEVERITY_ORDER: DisplayCondition[] = [
   'thunderstorm',

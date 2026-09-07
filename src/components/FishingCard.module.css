@@ -1,0 +1,16 @@
+/* Section 11: optional and visually secondary to the weather consensus — a
+   lighter treatment than ConsensusCard.module.css's filled surface. */
+.card {
+  border: 1px solid var(--color-surface);
+  border-radius: 12px;
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.title {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+}

@@ -1,0 +1,32 @@
+.selector {
+  display: flex;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--color-surface);
+}
+
+.option {
+  flex: 1;
+  padding: var(--space-2);
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  cursor: pointer;
+  /* Section 11.3: large touch target, one tap, no confirmation. */
+  min-height: 44px;
+}
+
+.option:hover {
+  background: var(--color-surface);
+}
+
+.selected {
+  background: var(--color-accent);
+  color: #041018;
+}
+
+.selected:hover {
+  background: var(--color-accent);
+}

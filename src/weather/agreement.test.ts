@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { TOLERANCE_CURVES } from '../config/agreementThresholds'
 import {
+  agreementDots,
+  agreementLabel,
   calculateFieldAgreement,
   calculateForecastAgreement,
   calculateOverallAgreement,
+  mostDisagreementField,
   spreadToAgreement,
 } from './agreement'
 import { makeModel } from './fixtures'
@@ -103,5 +106,45 @@ describe('calculateForecastAgreement', () => {
       makeModel({ modelId: 'b', precipitationMm: 20 }),
     ])
     expect(disagreeing.overall).toBeLessThan(agreeing.overall)
+  })
+})
+
+describe('agreementDots', () => {
+  it('fills all five dots at perfect agreement', () => {
+    expect(agreementDots(1)).toBe('●●●●●')
+  })
+
+  it('fills no dots at zero agreement', () => {
+    expect(agreementDots(0)).toBe('○○○○○')
+  })
+
+  it('rounds to the nearest dot', () => {
+    expect(agreementDots(0.8)).toBe('●●●●○')
+  })
+})
+
+describe('agreementLabel', () => {
+  it.each([
+    [0.95, 'Very High Agreement'],
+    [0.8, 'High Agreement'],
+    [0.6, 'Mixed Forecast'],
+    [0.3, 'Low Agreement'],
+    [0.1, 'Very Low Agreement'],
+  ])('labels %s as %s', (score, label) => {
+    expect(agreementLabel(score)).toBe(label)
+  })
+})
+
+describe('mostDisagreementField', () => {
+  it('names the field with the lowest score', () => {
+    const field = mostDisagreementField({
+      temperature: 0.9,
+      wind: 0.8,
+      cloudCover: 0.7,
+      precipitation: 0.2,
+      pressure: 0.95,
+      overall: 0.6,
+    })
+    expect(field).toBe('precipitation')
   })
 })

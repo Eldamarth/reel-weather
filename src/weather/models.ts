@@ -46,6 +46,9 @@ export type DisplayCondition =
   | 'thunderstorm'
   | 'fog'
 
+/** Section 12.2. */
+export type LightLevel = 'bright' | 'moderate' | 'low' | 'dark'
+
 /** Section 5.4. */
 export interface PrecipitationConsensus {
   amountMedianMm: number | null

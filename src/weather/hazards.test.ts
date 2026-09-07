@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { deriveHazardFlags } from './hazards'
+import { deriveHazardFlags, hazardMessage } from './hazards'
 import { makeModel } from './fixtures'
 
 describe('deriveHazardFlags', () => {
@@ -43,5 +43,19 @@ describe('deriveHazardFlags', () => {
     const light = deriveHazardFlags([makeModel({ modelId: 'a', weatherCode: 71 })])
     expect(heavy).toContainEqual({ type: 'heavy-snow', modelsPredicting: ['a'], modelCount: 1 })
     expect(light).toEqual([])
+  })
+})
+
+describe('hazardMessage', () => {
+  it('matches the plan wording for a single dissenting model', () => {
+    expect(hazardMessage({ type: 'thunderstorm', modelsPredicting: ['d'], modelCount: 4 })).toBe(
+      '1 model indicates thunderstorms.',
+    )
+  })
+
+  it('uses plural phrasing for more than one model', () => {
+    expect(hazardMessage({ type: 'high-wind', modelsPredicting: ['a', 'b'], modelCount: 5 })).toBe(
+      '2 of 5 models indicate high wind.',
+    )
   })
 })

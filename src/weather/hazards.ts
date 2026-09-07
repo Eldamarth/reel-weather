@@ -52,3 +52,18 @@ export function deriveHazardFlags(models: NormalizedForecastPoint[]): HazardFlag
     .filter((c) => c.modelsPredicting.length >= HAZARD_FLAG_MIN_MODELS)
     .map((c) => ({ type: c.type, modelsPredicting: c.modelsPredicting, modelCount }))
 }
+
+const HAZARD_LABELS: Record<HazardType, string> = {
+  thunderstorm: 'thunderstorms',
+  'heavy-rain': 'heavy rain',
+  'high-wind': 'high wind',
+  'heavy-snow': 'heavy snow',
+}
+
+/** Section 6.4's "⚠ One model indicates thunderstorms" banner text. */
+export function hazardMessage(flag: HazardFlag): string {
+  const count = flag.modelsPredicting.length
+  const verb = count === 1 ? 'indicates' : 'indicate'
+  const subject = count === 1 ? '1 model' : `${count} of ${flag.modelCount} models`
+  return `${subject} ${verb} ${HAZARD_LABELS[flag.type]}.`
+}

@@ -1,6 +1,29 @@
 import { describe, expect, it } from 'vitest'
-import { deriveCondition } from './condition'
+import { CONDITION_DISPLAY, deriveCondition } from './condition'
 import { makeModel } from './fixtures'
+import type { DisplayCondition } from './models'
+
+const ALL_CONDITIONS: DisplayCondition[] = [
+  'clear',
+  'mostly-clear',
+  'partly-cloudy',
+  'cloudy',
+  'light-rain',
+  'rain',
+  'heavy-rain',
+  'snow',
+  'thunderstorm',
+  'fog',
+]
+
+describe('CONDITION_DISPLAY', () => {
+  it('has an emoji and label for every DisplayCondition', () => {
+    for (const condition of ALL_CONDITIONS) {
+      expect(CONDITION_DISPLAY[condition]).toBeDefined()
+      expect(CONDITION_DISPLAY[condition].emoji.length).toBeGreaterThan(0)
+    }
+  })
+})
 
 describe('deriveCondition', () => {
   it('picks the unanimous condition when every model agrees', () => {

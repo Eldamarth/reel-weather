@@ -93,3 +93,40 @@ export function calculateForecastAgreement(models: NormalizedForecastPoint[]): F
 
   return { ...fields, overall: calculateOverallAgreement(fields, AGREEMENT_WEIGHTS) }
 }
+
+const TOTAL_AGREEMENT_DOTS = 5
+
+/** Section 7.2's "●●●●○" meter. */
+export function agreementDots(overall: number): string {
+  const filled = Math.min(
+    TOTAL_AGREEMENT_DOTS,
+    Math.max(0, Math.round(overall * TOTAL_AGREEMENT_DOTS)),
+  )
+  return '●'.repeat(filled) + '○'.repeat(TOTAL_AGREEMENT_DOTS - filled)
+}
+
+/** Section 6.5: user-facing terminology emphasizes agreement, not statistical confidence. */
+export function agreementLabel(overall: number): string {
+  if (overall >= 0.9) return 'Very High Agreement'
+  if (overall >= 0.75) return 'High Agreement'
+  if (overall >= 0.5) return 'Mixed Forecast'
+  if (overall >= 0.25) return 'Low Agreement'
+  return 'Very Low Agreement'
+}
+
+const FIELD_DISPLAY_NAMES: Record<keyof Omit<ForecastAgreement, 'overall'>, string> = {
+  temperature: 'temperature',
+  wind: 'wind',
+  cloudCover: 'cloud cover',
+  precipitation: 'precipitation',
+  pressure: 'pressure',
+}
+
+/** Section 7.2's "Most disagreement: precipitation" line. */
+export function mostDisagreementField(agreement: ForecastAgreement): string {
+  const fields = Object.keys(FIELD_DISPLAY_NAMES) as Array<keyof typeof FIELD_DISPLAY_NAMES>
+  const lowest = fields.reduce((worst, field) =>
+    agreement[field] < agreement[worst] ? field : worst,
+  )
+  return FIELD_DISPLAY_NAMES[lowest]
+}
