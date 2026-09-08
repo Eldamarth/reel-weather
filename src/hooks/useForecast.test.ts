@@ -1,6 +1,7 @@
-import { renderHook, waitFor } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 import type { ForecastProvider, NormalizedForecast } from '../api/providers/ForecastProvider'
+import { makeModel } from '../weather/fixtures'
 import { useForecast } from './useForecast'
 
 const BOULDER = { latitude: 40.015, longitude: -105.2705 }
@@ -19,6 +20,10 @@ function failingProvider(message: string): ForecastProvider {
   }
 }
 
+function nowIso(): string {
+  return new Date().toISOString().slice(0, 13) + ':00'
+}
+
 describe('useForecast', () => {
   it('is idle with no location', () => {
     // Provider is constructed once, outside the render callback — passing a
@@ -29,35 +34,13 @@ describe('useForecast', () => {
     expect(result.current.status).toBe('idle')
   })
 
-  it('resolves to a consensus + agreement once the provider responds', async () => {
-    const now = new Date()
-    const nowIso = now.toISOString().slice(0, 13) + ':00' // matches the fixture's hour, ignoring timezone precision for this test's purpose
-
+  it('resolves to an hourly series anchored on "now" once the provider responds', async () => {
     const provider = fakeProvider({
       sourceId: 'open-meteo',
       timezone: 'UTC',
       unavailableModels: [],
       byModel: {
-        model_a: [
-          {
-            sourceId: 'open-meteo',
-            modelId: 'model_a',
-            timestamp: nowIso,
-            temperatureC: 20,
-            apparentTemperatureC: 19,
-            relativeHumidityPct: 50,
-            windSpeedKph: 10,
-            windGustKph: 15,
-            windDirectionDeg: 180,
-            cloudCoverPct: 50,
-            precipitationMm: 0,
-            precipitationProbabilityPct: 10,
-            pressureHpa: 1013,
-            weatherCode: 0,
-            isDay: true,
-            shortwaveRadiation: 400,
-          },
-        ],
+        model_a: [makeModel({ modelId: 'model_a', timestamp: nowIso(), temperatureC: 20 })],
       },
     })
 
@@ -65,9 +48,41 @@ describe('useForecast', () => {
 
     await waitFor(() => expect(result.current.status).toBe('success'))
     if (result.current.status !== 'success') throw new Error('expected success')
-    expect(result.current.consensus.temperatureC).toBe(20)
-    expect(result.current.agreement.overall).toBeGreaterThan(0)
+    expect(result.current.series).toHaveLength(1)
+    expect(result.current.selectedIndex).toBe(0)
+    expect(result.current.nowIndex).toBe(0)
+    expect(result.current.series[result.current.selectedIndex].consensus.temperatureC).toBe(20)
     expect(result.current.timezone).toBe('UTC')
+  })
+
+  it('setSelectedIndex moves the selection without re-fetching', async () => {
+    const getForecast = vi.fn(async () => ({
+      sourceId: 'open-meteo',
+      timezone: 'UTC',
+      unavailableModels: [],
+      byModel: {
+        model_a: [
+          makeModel({ modelId: 'model_a', timestamp: nowIso(), temperatureC: 20 }),
+          makeModel({ modelId: 'model_a', timestamp: '2099-01-01T00:00', temperatureC: 30 }),
+        ],
+      },
+    }))
+    const provider: ForecastProvider = { id: 'fake', name: 'Fake', getForecast }
+
+    const { result } = renderHook(() => useForecast(BOULDER, provider))
+    await waitFor(() => expect(result.current.status).toBe('success'))
+    const initial = result.current
+    if (initial.status !== 'success') throw new Error('expected success')
+
+    act(() => initial.setSelectedIndex(1))
+
+    await waitFor(() => {
+      if (result.current.status !== 'success') throw new Error('expected success')
+      expect(result.current.selectedIndex).toBe(1)
+    })
+    if (result.current.status !== 'success') throw new Error('expected success')
+    expect(result.current.series[result.current.selectedIndex].consensus.temperatureC).toBe(30)
+    expect(getForecast).toHaveBeenCalledTimes(1)
   })
 
   it('surfaces provider errors instead of throwing', async () => {

@@ -9,6 +9,8 @@ import styles from './ConsensusCard.module.css'
 export interface ConsensusCardProps {
   locationName: string
   timezone: string
+  /** "NOW" when the selected hour is the live one, else a clock-time label (section 9). */
+  timeLabel: string
   consensus: ConsensusPoint
   agreement: ForecastAgreement
   temperatureUnit: TemperatureUnit
@@ -18,6 +20,7 @@ export interface ConsensusCardProps {
 export function ConsensusCard({
   locationName,
   timezone,
+  timeLabel,
   consensus,
   agreement,
   temperatureUnit,
@@ -32,7 +35,9 @@ export function ConsensusCard({
     <div className={styles.card}>
       <div className={styles.header}>
         <span>{locationName}</span>
-        <span>NOW ({timezone})</span>
+        <span>
+          {timeLabel} ({timezone})
+        </span>
       </div>
 
       {consensus.hazards.map((hazard) => (

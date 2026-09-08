@@ -98,6 +98,14 @@ export interface ForecastAgreement {
   overall: number
 }
 
+/** Section 9: one point on the hourly timeline. */
+export interface HourlyForecast {
+  timestamp: string
+  consensus: ConsensusPoint
+  agreement: ForecastAgreement
+  modelsAtHour: Record<string, NormalizedForecastPoint>
+}
+
 /** Section 3.2. */
 export type ModelType = 'direct-nwp' | 'blend' | 'ensemble-mean'
 

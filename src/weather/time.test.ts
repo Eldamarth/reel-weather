@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { findCurrentHourIndex, toLocalHourString } from './time'
+import {
+  dateOf,
+  findCurrentHourIndex,
+  formatHourLabel,
+  toLocalHourString,
+  weekdayLabel,
+} from './time'
 
 describe('toLocalHourString', () => {
   it('formats a UTC instant into the target timezone, truncated to the hour', () => {
@@ -32,5 +38,28 @@ describe('findCurrentHourIndex', () => {
 
   it('returns 0 for an empty series', () => {
     expect(findCurrentHourIndex([], '2026-09-06T14:00')).toBe(0)
+  })
+})
+
+describe('dateOf', () => {
+  it('extracts the calendar-date portion', () => {
+    expect(dateOf('2026-09-06T14:00')).toBe('2026-09-06')
+  })
+})
+
+describe('formatHourLabel', () => {
+  it('formats midnight, noon, and afternoon in 12-hour form', () => {
+    expect(formatHourLabel('2026-09-06T00:00')).toBe('12 AM')
+    expect(formatHourLabel('2026-09-06T12:00')).toBe('12 PM')
+    expect(formatHourLabel('2026-09-06T14:00')).toBe('2 PM')
+    expect(formatHourLabel('2026-09-06T09:00')).toBe('9 AM')
+  })
+})
+
+describe('weekdayLabel', () => {
+  it('returns the correct weekday regardless of the runtime timezone', () => {
+    // 2026-09-06 is a Sunday.
+    expect(weekdayLabel('2026-09-06T00:00')).toBe('Sun')
+    expect(weekdayLabel('2026-09-06T23:00')).toBe('Sun')
   })
 })

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildConsensusPoint, circularMeanDegrees, median } from './consensus'
+import { buildConsensusPoint, buildHourlySeries, circularMeanDegrees, median } from './consensus'
 import { makeModel } from './fixtures'
 
 describe('median', () => {
@@ -123,5 +123,50 @@ describe('buildConsensusPoint', () => {
     expect(point.windDirectionDeg).not.toBeNull()
     const deg = point.windDirectionDeg as number
     expect(Math.min(deg, 360 - deg)).toBeCloseTo(0, 5)
+  })
+})
+
+describe('buildHourlySeries', () => {
+  it('builds one entry per timestamp, sorted chronologically', () => {
+    const byModel = {
+      a: [
+        makeModel({ modelId: 'a', timestamp: '2026-09-06T13:00', temperatureC: 21 }),
+        makeModel({ modelId: 'a', timestamp: '2026-09-06T12:00', temperatureC: 20 }),
+      ],
+    }
+    const series = buildHourlySeries(byModel, ['a'])
+    expect(series.map((h) => h.timestamp)).toEqual(['2026-09-06T12:00', '2026-09-06T13:00'])
+    expect(series[0].consensus.temperatureC).toBe(20)
+  })
+
+  it('handles a shorter-horizon model dropping out partway through the series', () => {
+    const byModel = {
+      hrrr: [
+        makeModel({ modelId: 'hrrr', timestamp: '2026-09-06T12:00' }),
+        makeModel({ modelId: 'hrrr', timestamp: '2026-09-06T13:00' }),
+      ],
+      gfs: [
+        makeModel({ modelId: 'gfs', timestamp: '2026-09-06T12:00' }),
+        makeModel({ modelId: 'gfs', timestamp: '2026-09-06T13:00' }),
+        makeModel({ modelId: 'gfs', timestamp: '2026-09-06T14:00' }),
+      ],
+    }
+    const series = buildHourlySeries(byModel, ['hrrr', 'gfs'])
+
+    expect(series).toHaveLength(3)
+    expect(series[0].consensus.unavailableModels).toEqual([])
+    expect(series[2].consensus.contributingModels).toEqual(['gfs'])
+    expect(series[2].consensus.unavailableModels).toEqual(['hrrr'])
+    expect(series[2].modelsAtHour.hrrr).toBeUndefined()
+    expect(series[2].modelsAtHour.gfs).toBeDefined()
+  })
+
+  it('computes agreement per hour, not just for the whole series', () => {
+    const byModel = {
+      a: [makeModel({ modelId: 'a', timestamp: '2026-09-06T12:00', temperatureC: 20 })],
+      b: [makeModel({ modelId: 'b', timestamp: '2026-09-06T12:00', temperatureC: 20 })],
+    }
+    const series = buildHourlySeries(byModel, ['a', 'b'])
+    expect(series[0].agreement.overall).toBeGreaterThan(0.9)
   })
 })

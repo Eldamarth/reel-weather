@@ -114,6 +114,15 @@ export function agreementLabel(overall: number): string {
   return 'Very Low Agreement'
 }
 
+export type AgreementTier = 'high' | 'mixed' | 'low'
+
+/** Section 9: a coarse tier for the timeline's per-hour agreement indicator. */
+export function agreementTier(overall: number): AgreementTier {
+  if (overall >= 0.75) return 'high'
+  if (overall >= 0.5) return 'mixed'
+  return 'low'
+}
+
 const FIELD_DISPLAY_NAMES: Record<keyof Omit<ForecastAgreement, 'overall'>, string> = {
   temperature: 'temperature',
   wind: 'wind',

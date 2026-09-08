@@ -1,0 +1,72 @@
+.scroll {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: var(--space-1);
+  -webkit-overflow-scrolling: touch;
+}
+
+.hour {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+  min-width: 56px;
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-1);
+  border: none;
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.selected {
+  background: var(--color-accent);
+  color: #041018;
+}
+
+.day {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.selected .day {
+  color: #041018;
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.temp {
+  font-size: 0.85rem;
+}
+
+.agreementDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 2px;
+}
+
+.agreementDot.high {
+  background: var(--color-accent);
+}
+
+.selected .agreementDot.high {
+  background: #041018;
+}
+
+.agreementDot.mixed {
+  background: var(--color-text-muted);
+}
+
+.agreementDot.low {
+  background: var(--color-warning);
+}

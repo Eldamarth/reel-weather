@@ -1,16 +1,22 @@
 import { useEffect, useState } from 'react'
 import { openMeteoProvider } from '../api/providers/OpenMeteoProvider'
 import type { ForecastProvider } from '../api/providers/ForecastProvider'
-import { calculateForecastAgreement } from '../weather/agreement'
-import { buildConsensusPoint } from '../weather/consensus'
+import { buildHourlySeries } from '../weather/consensus'
 import { selectModels } from '../weather/modelSelection'
-import type {
-  ConsensusPoint,
-  ForecastAgreement,
-  GeoCoordinates,
-  NormalizedForecastPoint,
-} from '../weather/models'
+import type { GeoCoordinates, HourlyForecast } from '../weather/models'
 import { findCurrentHourIndex, toLocalHourString } from '../weather/time'
+
+type FetchState =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | {
+      status: 'success'
+      timezone: string
+      series: HourlyForecast[]
+      nowIndex: number
+      selectedModelIds: string[]
+    }
+  | { status: 'error'; message: string }
 
 export type UseForecastResult =
   | { status: 'idle' }
@@ -18,34 +24,35 @@ export type UseForecastResult =
   | {
       status: 'success'
       timezone: string
-      consensus: ConsensusPoint
-      agreement: ForecastAgreement
+      series: HourlyForecast[]
+      selectedIndex: number
+      setSelectedIndex: (index: number) => void
+      nowIndex: number
       selectedModelIds: string[]
-      /** Each selected model's own point at "now", keyed by model ID — for the per-model comparison list (section 7.3). Absent key means unavailable. */
-      modelsAtNow: Record<string, NormalizedForecastPoint>
     }
   | { status: 'error'; message: string }
 
 /**
- * Orchestrates the pieces built in Phase 2/3: pick models for this location
- * and time (section 3.2), fetch them, and reduce to one consensus point for
- * "now" (section 7 — the hourly timeline that lets the user move off "now"
- * is V1.1, section 9; this hook only needs the current hour for Phase 3).
+ * Orchestrates the pieces built in Phases 2/3/6: pick models for this
+ * location and time (section 3.2), fetch them, and reduce to a full hourly
+ * series (section 9) rather than just "now" — `selectedIndex` is what the
+ * timeline moves, independent of the fetch itself.
  */
 export function useForecast(
   location: GeoCoordinates | null,
   provider: ForecastProvider = openMeteoProvider,
 ): UseForecastResult {
-  const [result, setResult] = useState<UseForecastResult>({ status: 'idle' })
+  const [fetchState, setFetchState] = useState<FetchState>({ status: 'idle' })
+  const [selectedIndex, setSelectedIndex] = useState(0)
 
   useEffect(() => {
     if (!location) {
-      setResult({ status: 'idle' })
+      setFetchState({ status: 'idle' })
       return
     }
 
     let cancelled = false
-    setResult({ status: 'loading' })
+    setFetchState({ status: 'loading' })
 
     const now = new Date()
     const selectedModels = selectModels(location, now, now)
@@ -56,36 +63,33 @@ export function useForecast(
       .then((forecast) => {
         if (cancelled) return
 
-        const nowLocalHour = toLocalHourString(now, forecast.timezone)
-        const modelsAtNow: Record<string, NormalizedForecastPoint> = {}
-        for (const [modelId, points] of Object.entries(forecast.byModel)) {
-          const index = findCurrentHourIndex(
-            points.map((p) => p.timestamp),
-            nowLocalHour,
-          )
-          const point = points[index]
-          if (point) modelsAtNow[modelId] = point
-        }
-
-        const points = Object.values(modelsAtNow)
-        if (points.length === 0) {
-          setResult({ status: 'error', message: 'No forecast data is available right now.' })
+        const series = buildHourlySeries(forecast.byModel, selectedModelIds)
+        if (series.length === 0) {
+          setFetchState({ status: 'error', message: 'No forecast data is available right now.' })
           return
         }
 
-        const timestamp = points[0].timestamp
-        setResult({
+        const nowLocalHour = toLocalHourString(now, forecast.timezone)
+        const nowIndex = findCurrentHourIndex(
+          series.map((h) => h.timestamp),
+          nowLocalHour,
+        )
+
+        setFetchState({
           status: 'success',
           timezone: forecast.timezone,
-          consensus: buildConsensusPoint(points, selectedModelIds, timestamp),
-          agreement: calculateForecastAgreement(points),
+          series,
+          nowIndex,
           selectedModelIds,
-          modelsAtNow,
         })
+        setSelectedIndex(nowIndex)
       })
       .catch((err: unknown) => {
         if (cancelled) return
-        setResult({ status: 'error', message: err instanceof Error ? err.message : String(err) })
+        setFetchState({
+          status: 'error',
+          message: err instanceof Error ? err.message : String(err),
+        })
       })
 
     return () => {
@@ -99,5 +103,11 @@ export function useForecast(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location?.latitude, location?.longitude, provider.id])
 
-  return result
+  if (fetchState.status !== 'success') return fetchState
+
+  return {
+    ...fetchState,
+    selectedIndex: Math.min(selectedIndex, fetchState.series.length - 1),
+    setSelectedIndex,
+  }
 }

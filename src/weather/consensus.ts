@@ -1,7 +1,13 @@
 import { PRECIPITATION_DETECTION_THRESHOLD_MM } from '../config/hazardThresholds'
+import { calculateForecastAgreement } from './agreement'
 import { deriveCondition } from './condition'
 import { deriveHazardFlags } from './hazards'
-import type { ConsensusPoint, NormalizedForecastPoint, PrecipitationConsensus } from './models'
+import type {
+  ConsensusPoint,
+  HourlyForecast,
+  NormalizedForecastPoint,
+  PrecipitationConsensus,
+} from './models'
 
 function nonNull(values: Array<number | null>): number[] {
   return values.filter((v): v is number => v !== null)
@@ -87,4 +93,36 @@ export function buildConsensusPoint(
     unavailableModels,
     modelCount: contributingModels.length,
   }
+}
+
+/**
+ * Section 9: builds one HourlyForecast per timestamp across the full fetched
+ * range, not just "now" — the union of every model's timestamps, since a
+ * shorter-horizon model's absence at a later hour is exactly what
+ * `unavailableModels` (section 5.3) is for, not a reason to drop the hour.
+ */
+export function buildHourlySeries(
+  byModel: Record<string, NormalizedForecastPoint[]>,
+  selectedModelIds: string[],
+): HourlyForecast[] {
+  const timestamps = new Set<string>()
+  for (const points of Object.values(byModel)) {
+    for (const point of points) timestamps.add(point.timestamp)
+  }
+
+  return [...timestamps].sort().map((timestamp) => {
+    const modelsAtHour: Record<string, NormalizedForecastPoint> = {}
+    for (const [modelId, points] of Object.entries(byModel)) {
+      const point = points.find((p) => p.timestamp === timestamp)
+      if (point) modelsAtHour[modelId] = point
+    }
+
+    const points = Object.values(modelsAtHour)
+    return {
+      timestamp,
+      consensus: buildConsensusPoint(points, selectedModelIds, timestamp),
+      agreement: calculateForecastAgreement(points),
+      modelsAtHour,
+    }
+  })
 }

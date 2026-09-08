@@ -3,6 +3,7 @@ import { TOLERANCE_CURVES } from '../config/agreementThresholds'
 import {
   agreementDots,
   agreementLabel,
+  agreementTier,
   calculateFieldAgreement,
   calculateForecastAgreement,
   calculateOverallAgreement,
@@ -146,5 +147,15 @@ describe('mostDisagreementField', () => {
       overall: 0.6,
     })
     expect(field).toBe('precipitation')
+  })
+})
+
+describe('agreementTier', () => {
+  it.each([
+    [0.9, 'high'],
+    [0.6, 'mixed'],
+    [0.2, 'low'],
+  ])('tiers %s as %s', (score, tier) => {
+    expect(agreementTier(score)).toBe(tier)
   })
 })

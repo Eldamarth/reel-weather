@@ -32,3 +32,32 @@ export function findCurrentHourIndex(times: string[], nowLocalHourString: string
   if (firstAtOrAfter === -1) return times.length - 1
   return firstAtOrAfter
 }
+
+/** The "YYYY-MM-DD" calendar-date portion of a forecast timestamp. */
+export function dateOf(timestamp: string): string {
+  return timestamp.slice(0, 10)
+}
+
+/**
+ * Section 9's timeline label, rendered as a 12-hour clock time. The
+ * timestamp string is already location-local (section 8.4), so this is
+ * string slicing, not a timezone conversion.
+ */
+export function formatHourLabel(timestamp: string): string {
+  const hour = Number(timestamp.slice(11, 13))
+  const period = hour >= 12 ? 'PM' : 'AM'
+  const hour12 = hour % 12 === 0 ? 12 : hour % 12
+  return `${hour12} ${period}`
+}
+
+/**
+ * Short weekday name for a timestamp's calendar date, for day-boundary
+ * markers on the timeline. Builds the Date from explicit Y/M/D components
+ * (not `new Date("2026-09-06")`, which parses as UTC midnight and can shift
+ * to the wrong weekday for timezones behind UTC) so the result is correct
+ * regardless of the runtime's own timezone.
+ */
+export function weekdayLabel(timestamp: string): string {
+  const [year, month, day] = dateOf(timestamp).split('-').map(Number)
+  return new Date(year, month - 1, day).toLocaleDateString('en-US', { weekday: 'short' })
+}

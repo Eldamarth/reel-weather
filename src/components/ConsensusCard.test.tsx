@@ -15,6 +15,7 @@ describe('ConsensusCard', () => {
       <ConsensusCard
         locationName="Boulder, CO"
         timezone="America/Denver"
+        timeLabel="NOW"
         consensus={consensus}
         agreement={agreement}
         temperatureUnit="celsius"
@@ -35,6 +36,7 @@ describe('ConsensusCard', () => {
       <ConsensusCard
         locationName="Boulder, CO"
         timezone="America/Denver"
+        timeLabel="NOW"
         consensus={consensus}
         agreement={agreement}
         temperatureUnit="fahrenheit"
@@ -58,6 +60,7 @@ describe('ConsensusCard', () => {
       <ConsensusCard
         locationName="Boulder, CO"
         timezone="America/Denver"
+        timeLabel="NOW"
         consensus={consensus}
         agreement={agreement}
         temperatureUnit="fahrenheit"
