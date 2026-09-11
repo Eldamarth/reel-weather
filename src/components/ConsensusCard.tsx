@@ -2,6 +2,7 @@ import { mostDisagreementField } from '../weather/agreement'
 import { CONDITION_DISPLAY } from '../weather/condition'
 import { hazardMessage } from '../weather/hazards'
 import type { ConsensusPoint, ForecastAgreement } from '../weather/models'
+import { formatDateLabel } from '../weather/time'
 import { formatTemperature, type TemperatureUnit } from '../weather/units'
 import { AgreementMeter } from './AgreementMeter'
 import styles from './ConsensusCard.module.css'
@@ -36,7 +37,7 @@ export function ConsensusCard({
       <div className={styles.header}>
         <span>{locationName}</span>
         <span>
-          {timeLabel} ({timezone})
+          {formatDateLabel(consensus.timestamp)} · {timeLabel} ({timezone})
         </span>
       </div>
 

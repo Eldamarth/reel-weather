@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   dateOf,
   findCurrentHourIndex,
+  formatDateLabel,
   formatHourLabel,
   toLocalHourString,
   weekdayLabel,
@@ -61,5 +62,15 @@ describe('weekdayLabel', () => {
     // 2026-09-06 is a Sunday.
     expect(weekdayLabel('2026-09-06T00:00')).toBe('Sun')
     expect(weekdayLabel('2026-09-06T23:00')).toBe('Sun')
+  })
+})
+
+describe('formatDateLabel', () => {
+  it('formats as "Weekday, Mon D"', () => {
+    expect(formatDateLabel('2026-09-06T14:00')).toBe('Sun, Sep 6')
+  })
+
+  it('is stable across the hour, since only the calendar date matters', () => {
+    expect(formatDateLabel('2026-09-06T00:00')).toBe(formatDateLabel('2026-09-06T23:00'))
   })
 })

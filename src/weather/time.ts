@@ -61,3 +61,17 @@ export function weekdayLabel(timestamp: string): string {
   const [year, month, day] = dateOf(timestamp).split('-').map(Number)
   return new Date(year, month - 1, day).toLocaleDateString('en-US', { weekday: 'short' })
 }
+
+/**
+ * "Tue, Sep 8" — for display anywhere a selected hour could be days ahead
+ * (section 9's timeline scrolls the full fetched range), so the header can't
+ * rely on the viewer already knowing what day is being shown. Not yet implemented.
+ */
+export function formatDateLabel(timestamp: string): string {
+  const [year, month, day] = dateOf(timestamp).split('-').map(Number)
+  return new Date(year, month - 1, day).toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  })
+}

@@ -25,6 +25,9 @@ describe('ConsensusCard', () => {
     expect(screen.getByText('Boulder, CO')).toBeInTheDocument()
     expect(screen.getByText('20°C', { exact: false })).toBeInTheDocument()
     expect(screen.getByText('Consensus from 3 models')).toBeInTheDocument()
+    // The date is shown alongside the time so a selected hour days ahead (section 9's
+    // timeline) doesn't read as ambiguous about which day it belongs to.
+    expect(screen.getByText('Sun, Sep 6', { exact: false })).toBeInTheDocument()
   })
 
   it('renders in Fahrenheit when that is the selected unit', () => {
