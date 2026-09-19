@@ -58,6 +58,25 @@ describe('HourlyTimeline', () => {
     expect(screen.getAllByText(/Sun|Mon/).length).toBeGreaterThan(0)
   })
 
+  it('renders the day name as a divider between days, not as a row inside every button', () => {
+    render(
+      <HourlyTimeline
+        series={SERIES}
+        selectedIndex={0}
+        nowIndex={0}
+        onSelect={vi.fn()}
+        temperatureUnit="celsius"
+      />,
+    )
+    // One divider per distinct calendar date (Sept 6 and Sept 7) — not one per hour,
+    // so ordinary hour buttons pay no space cost for a label they never show.
+    const options = screen.getAllByRole('option')
+    expect(options).toHaveLength(SERIES.length)
+    for (const option of options) {
+      expect(option.textContent).not.toMatch(/Sun|Mon/)
+    }
+  })
+
   it('marks the selected hour and calls onSelect with the tapped index', async () => {
     const onSelect = vi.fn()
     const user = userEvent.setup()

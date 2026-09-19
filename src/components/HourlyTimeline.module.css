@@ -7,6 +7,30 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.item {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-1);
+}
+
+.dayDivider {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-1) 0 2px;
+  border-left: 1px solid var(--color-surface);
+}
+
+.dayDividerLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
 .hour {
   scroll-snap-align: start;
   flex: 0 0 auto;
@@ -26,16 +50,6 @@
 
 .selected {
   background: var(--color-accent);
-  color: #041018;
-}
-
-.day {
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-}
-
-.selected .day {
   color: #041018;
 }
 

@@ -1,18 +1,24 @@
 import type { DisplayCondition, NormalizedForecastPoint } from './models'
 import { weatherCodeToCondition } from './weatherCodes'
 
-/** Section 5.2's icon vocabulary — a small, fixed set of emoji regardless of source model. */
-export const CONDITION_DISPLAY: Record<DisplayCondition, { emoji: string; label: string }> = {
-  clear: { emoji: '☀️', label: 'Clear' },
-  'mostly-clear': { emoji: '🌤️', label: 'Mostly clear' },
-  'partly-cloudy': { emoji: '⛅', label: 'Partly cloudy' },
-  cloudy: { emoji: '☁️', label: 'Cloudy' },
-  'light-rain': { emoji: '🌦️', label: 'Light rain' },
-  rain: { emoji: '🌧️', label: 'Rain' },
-  'heavy-rain': { emoji: '🌧️', label: 'Heavy rain' },
-  snow: { emoji: '🌨️', label: 'Snow' },
-  thunderstorm: { emoji: '⛈️', label: 'Thunderstorm' },
-  fog: { emoji: '🌫️', label: 'Fog' },
+/**
+ * Section 5.2's icon vocabulary. The visual glyph itself is a hand-authored
+ * SVG (`components/icons/WeatherIcon.tsx`), not native emoji — emoji varies
+ * by OS/browser and several conditions (notably rain vs. heavy-rain) share
+ * an identical glyph, making them indistinguishable at small sizes. `label`
+ * remains the source of truth for the accessible name and any text display.
+ */
+export const CONDITION_DISPLAY: Record<DisplayCondition, { label: string }> = {
+  clear: { label: 'Clear' },
+  'mostly-clear': { label: 'Mostly clear' },
+  'partly-cloudy': { label: 'Partly cloudy' },
+  cloudy: { label: 'Cloudy' },
+  'light-rain': { label: 'Light rain' },
+  rain: { label: 'Rain' },
+  'heavy-rain': { label: 'Heavy rain' },
+  snow: { label: 'Snow' },
+  thunderstorm: { label: 'Thunderstorm' },
+  fog: { label: 'Fog' },
 }
 
 /** Most severe first — used only to break ties in the plurality vote below. */

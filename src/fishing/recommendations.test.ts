@@ -1,56 +1,75 @@
 import { describe, expect, it } from 'vitest'
-import { recommendLureColors } from './recommendations'
+import { recommendLureVisualStrategy } from './recommendations'
 
-describe('recommendLureColors', () => {
-  // The three deterministic cases from plan section 19's "Fishing-rule tests".
-
-  it('clear + bright -> natural/subtle + restrained flash', () => {
-    const rec = recommendLureColors('clear', 'bright')
-    expect(rec.properties).toEqual(expect.arrayContaining(['natural', 'subtle']))
-    expect(rec.properties).toContain('silver-flash')
-    expect(rec.properties).not.toContain('bright-visible')
+describe('recommendLureVisualStrategy', () => {
+  it('clarity picks the strategy: clear -> natural, stained -> contrast', () => {
+    expect(recommendLureVisualStrategy('clear', 'moderate').primaryStrategy).toBe('natural')
+    expect(recommendLureVisualStrategy('stained', 'moderate').primaryStrategy).toBe('contrast')
   })
 
-  it('murky + low light -> high contrast + dark silhouette + bright accent', () => {
-    const rec = recommendLureColors('murky', 'low')
-    expect(rec.properties).toEqual(
-      expect.arrayContaining(['high-contrast', 'dark-silhouette', 'bright-visible']),
-    )
+  it('murky offers a dark-silhouette primary and a bright-opaque alternate, not one universal winner', () => {
+    const rec = recommendLureVisualStrategy('murky', 'moderate')
+    expect(rec.primaryStrategy).toBe('dark-silhouette')
+    expect(rec.alternateStrategy).toBe('bright-opaque')
   })
 
-  it('stained + moderate light -> high visibility + gold/white/chartreuse/orange options', () => {
-    const rec = recommendLureColors('stained', 'moderate')
-    expect(rec.properties).toContain('bright-visible')
-    expect(rec.colors).toEqual(expect.arrayContaining(['gold', 'white', 'chartreuse', 'orange']))
+  it('clear and stained have no alternate strategy', () => {
+    expect(recommendLureVisualStrategy('clear', 'moderate').alternateStrategy).toBeUndefined()
+    expect(recommendLureVisualStrategy('stained', 'moderate').alternateStrategy).toBeUndefined()
   })
 
-  it('returns a full ColorRecommendation shape with a non-empty strategy and rationale', () => {
-    const rec = recommendLureColors('clear', 'dark')
-    expect(rec.strategy.length).toBeGreaterThan(0)
+  it('light modifies properties (flash up in bright light) without changing the strategy or colors', () => {
+    const moderate = recommendLureVisualStrategy('clear', 'moderate')
+    const bright = recommendLureVisualStrategy('clear', 'bright')
+
+    expect(bright.primaryStrategy).toBe(moderate.primaryStrategy)
+    expect(bright.exampleColors).toEqual(moderate.exampleColors)
+    expect(bright.properties.flash).not.toBe(moderate.properties.flash)
+  })
+
+  it('never maps light level directly to a different hue: the same clarity always yields the same example colors regardless of light', () => {
+    const lights = ['bright', 'moderate', 'low', 'dark'] as const
+    const colorSets = lights.map((l) => recommendLureVisualStrategy('clear', l).exampleColors)
+    for (const colors of colorSets) {
+      expect(colors).toEqual(colorSets[0])
+    }
+  })
+
+  it('low light increases silhouette and opacity while reducing flash', () => {
+    const moderate = recommendLureVisualStrategy('clear', 'moderate')
+    const low = recommendLureVisualStrategy('clear', 'low')
+
+    expect(low.properties.silhouette).toBe('medium') // low: 'low' + 1
+    expect(low.properties.opacity).toBe('medium') // low: 'low' + 1
+    expect(low.properties.flash).toBe('low') // already floored, clamps
+    expect(moderate.properties.silhouette).toBe('low')
+  })
+
+  it('downgrades confidence in low/dark light but never raises it', () => {
+    const clearModerate = recommendLureVisualStrategy('clear', 'moderate')
+    const clearDark = recommendLureVisualStrategy('clear', 'dark')
+    const murkyDark = recommendLureVisualStrategy('murky', 'dark')
+
+    expect(clearModerate.confidence).toBe('moderate')
+    expect(clearDark.confidence).toBe('low')
+    expect(murkyDark.confidence).toBe('low') // already low; stays low, not raised
+  })
+
+  it('carries the clarity-derived rationale', () => {
+    const rec = recommendLureVisualStrategy('stained', 'moderate')
     expect(rec.rationale.length).toBeGreaterThan(0)
-    expect(rec.colors.length).toBeGreaterThan(0)
-  })
-
-  it('is a pure lookup: the same clarity/light input always returns an equivalent recommendation', () => {
-    expect(recommendLureColors('murky', 'bright')).toEqual(recommendLureColors('murky', 'bright'))
+    expect(rec.rationale).toMatch(/contrast/i)
   })
 
   it('covers every clarity/light combination without throwing', () => {
-    const clarities: Array<Parameters<typeof recommendLureColors>[0]> = [
-      'clear',
-      'stained',
-      'murky',
-    ]
-    const lights: Array<Parameters<typeof recommendLureColors>[1]> = [
-      'bright',
-      'moderate',
-      'low',
-      'dark',
-    ]
+    const clarities: WaterClarityInput[] = ['clear', 'stained', 'murky']
+    const lights = ['bright', 'moderate', 'low', 'dark'] as const
     for (const clarity of clarities) {
       for (const light of lights) {
-        expect(() => recommendLureColors(clarity, light)).not.toThrow()
+        expect(() => recommendLureVisualStrategy(clarity, light)).not.toThrow()
       }
     }
   })
 })
+
+type WaterClarityInput = Parameters<typeof recommendLureVisualStrategy>[0]

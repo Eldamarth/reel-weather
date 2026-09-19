@@ -1,7 +1,7 @@
-import { CONDITION_DISPLAY } from '../weather/condition'
 import { weatherCodeToCondition } from '../weather/weatherCodes'
 import type { NormalizedForecastPoint } from '../weather/models'
 import { formatTemperature, type TemperatureUnit } from '../weather/units'
+import { WeatherIcon } from './icons/WeatherIcon'
 import styles from './ModelForecastList.module.css'
 
 export interface ModelForecastRowProps {
@@ -23,7 +23,6 @@ export function ModelForecastRow({ name, point, temperatureUnit }: ModelForecast
   }
 
   const condition = point.weatherCode != null ? weatherCodeToCondition(point.weatherCode) : null
-  const emoji = condition ? CONDITION_DISPLAY[condition].emoji : ''
   const temp = formatTemperature(point.temperatureC, temperatureUnit)
   const wind = point.windSpeedKph != null ? `${Math.round(point.windSpeedKph)} km/h` : '—'
   const precip =
@@ -34,8 +33,9 @@ export function ModelForecastRow({ name, point, temperatureUnit }: ModelForecast
   return (
     <tr className={styles.row}>
       <td>{name}</td>
-      <td>
-        {emoji} {temp}
+      <td className={styles.iconCell}>
+        {condition && <WeatherIcon condition={condition} size={18} />}
+        {temp}
       </td>
       <td>🌧️ {precip}</td>
       <td>💨 {wind}</td>

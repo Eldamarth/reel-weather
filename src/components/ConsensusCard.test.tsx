@@ -28,6 +28,11 @@ describe('ConsensusCard', () => {
     // The date is shown alongside the time so a selected hour days ahead (section 9's
     // timeline) doesn't read as ambiguous about which day it belongs to.
     expect(screen.getByText('Sun, Sep 6', { exact: false })).toBeInTheDocument()
+    // Stats need labels, not just an emoji and a bare number — a reader
+    // shouldn't have to guess what "4/6 models" or "99%" refers to.
+    expect(screen.getByText('Precip')).toBeInTheDocument()
+    expect(screen.getByText('Wind')).toBeInTheDocument()
+    expect(screen.getByText('Cloud')).toBeInTheDocument()
   })
 
   it('renders in Fahrenheit when that is the selected unit', () => {

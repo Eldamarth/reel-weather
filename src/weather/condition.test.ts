@@ -17,10 +17,10 @@ const ALL_CONDITIONS: DisplayCondition[] = [
 ]
 
 describe('CONDITION_DISPLAY', () => {
-  it('has an emoji and label for every DisplayCondition', () => {
+  it('has a label for every DisplayCondition', () => {
     for (const condition of ALL_CONDITIONS) {
       expect(CONDITION_DISPLAY[condition]).toBeDefined()
-      expect(CONDITION_DISPLAY[condition].emoji.length).toBeGreaterThan(0)
+      expect(CONDITION_DISPLAY[condition].label.length).toBeGreaterThan(0)
     }
   })
 })

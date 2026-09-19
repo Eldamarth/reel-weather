@@ -1,10 +1,10 @@
 import { mostDisagreementField } from '../weather/agreement'
-import { CONDITION_DISPLAY } from '../weather/condition'
 import { hazardMessage } from '../weather/hazards'
 import type { ConsensusPoint, ForecastAgreement } from '../weather/models'
 import { formatDateLabel } from '../weather/time'
 import { formatTemperature, type TemperatureUnit } from '../weather/units'
 import { AgreementMeter } from './AgreementMeter'
+import { WeatherIcon } from './icons/WeatherIcon'
 import styles from './ConsensusCard.module.css'
 
 export interface ConsensusCardProps {
@@ -26,7 +26,6 @@ export function ConsensusCard({
   agreement,
   temperatureUnit,
 }: ConsensusCardProps) {
-  const conditionDisplay = consensus.condition ? CONDITION_DISPLAY[consensus.condition] : null
   const temp = formatTemperature(consensus.temperatureC, temperatureUnit)
   const wind = consensus.windSpeedKph != null ? `${Math.round(consensus.windSpeedKph)} km/h` : '—'
   const cloud = consensus.cloudCoverPct != null ? `${Math.round(consensus.cloudCoverPct)}%` : '—'
@@ -48,13 +47,23 @@ export function ConsensusCard({
       ))}
 
       <div className={styles.temperature}>
-        {conditionDisplay?.emoji} {temp}
+        {consensus.condition && <WeatherIcon condition={consensus.condition} size={44} />}
+        {temp}
       </div>
 
       <div className={styles.stats}>
-        <span>🌧️ {precipFraction} models</span>
-        <span>💨 {wind}</span>
-        <span>☁️ {cloud}</span>
+        <span className={styles.stat}>
+          <span className={styles.statLabel}>Precip</span>
+          <span>🌧️ {precipFraction} models</span>
+        </span>
+        <span className={styles.stat}>
+          <span className={styles.statLabel}>Wind</span>
+          <span>💨 {wind}</span>
+        </span>
+        <span className={styles.stat}>
+          <span className={styles.statLabel}>Cloud</span>
+          <span>☁️ {cloud}</span>
+        </span>
       </div>
 
       <AgreementMeter overall={agreement.overall} />

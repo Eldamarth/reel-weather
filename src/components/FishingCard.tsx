@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { recommendLureColors } from '../fishing/recommendations'
+import { recommendLureVisualStrategy } from '../fishing/recommendations'
 import type { WaterClarity } from '../fishing/types'
 import { deriveLightLevel } from '../weather/lightLevel'
 import { LureColorRecommendation } from './LureColorRecommendation'
@@ -21,7 +21,7 @@ export interface FishingCardProps {
 export function FishingCard({ isDay, cloudCoverPct, shortwaveRadiation }: FishingCardProps) {
   const [clarity, setClarity] = useState<WaterClarity>('clear')
   const light = deriveLightLevel(isDay, cloudCoverPct, shortwaveRadiation)
-  const recommendation = recommendLureColors(clarity, light)
+  const recommendation = recommendLureVisualStrategy(clarity, light)
 
   return (
     <section className={styles.card}>
