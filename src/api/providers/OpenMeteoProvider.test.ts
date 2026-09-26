@@ -12,6 +12,11 @@ function okResponse(timezone = 'America/Denver') {
         temperature_2m: [20],
         weather_code: [2],
       },
+      daily: {
+        time: ['2026-09-06'],
+        sunrise: ['2026-09-06T06:48'],
+        sunset: ['2026-09-06T18:57'],
+      },
     }),
     { status: 200 },
   )
@@ -53,6 +58,7 @@ describe('openMeteoProvider.getForecast', () => {
     expect(calledUrls.some((u) => u.includes('models=ncep_gfs_seamless') && !u.includes(','))).toBe(
       true,
     )
+    expect(calledUrls.every((u) => u.includes('daily=sunrise%2Csunset'))).toBe(true)
   })
 
   it('normalizes a successful model response into byModel', async () => {
@@ -70,6 +76,9 @@ describe('openMeteoProvider.getForecast', () => {
     expect(result.unavailableModels).toEqual([])
     expect(result.byModel.ncep_hrrr_conus).toHaveLength(1)
     expect(result.byModel.ncep_hrrr_conus[0].temperatureC).toBe(20)
+    expect(result.daily).toEqual([
+      { date: '2026-09-06', sunrise: '2026-09-06T06:48', sunset: '2026-09-06T18:57' },
+    ])
   })
 
   it('treats a clean 400 {error:true} response as unavailable, not a thrown error', async () => {

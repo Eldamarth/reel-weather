@@ -3,6 +3,7 @@ import type {
   VisualProperties,
   VisualStrategy,
   WaterClarity,
+  WaterTint,
 } from '../fishing/types'
 import type { LightLevel } from '../weather/models'
 
@@ -96,4 +97,53 @@ export const LIGHT_PROPERTY_MODIFIERS: Record<
 export const LIGHT_CONFIDENCE_CEILING: Partial<Record<LightLevel, EvidenceConfidence>> = {
   low: 'low',
   dark: 'low',
+}
+
+/**
+ * Water tint (brief section 6/8/12): an optional refinement of clarity, not
+ * a replacement — it adjusts the same strategy clarity already chose, the
+ * same way light does, rather than picking a different one. `unspecified`
+ * is a genuine no-op, not a guess: the brief is explicit that recommendations
+ * should stay broad and contrast-based when tint isn't known.
+ *
+ * - green-algal: additional weight toward the silhouette clarity already
+ *   leans on (murky's primary is already dark-silhouette) — the Lake Erie
+ *   walleye study specifically associated black with algal turbidity.
+ * - tea-humic: favor opacity and contrast over any hue claim — humic water
+ *   selectively alters the underwater spectrum enough that the brief
+ *   explicitly says to avoid hue certainty here.
+ * - sediment: no property shift — the Lake Erie study's sediment finding
+ *   (yellow/gold) already matches "contrast" strategy's existing palette;
+ *   what sediment actually adds is confidence (see TINT_CONFIDENCE_FLOOR).
+ */
+export const TINT_PROPERTY_MODIFIERS: Record<
+  WaterTint,
+  Partial<Record<keyof VisualProperties, 1 | -1>>
+> = {
+  unspecified: {},
+  sediment: {},
+  'green-algal': { silhouette: 1 },
+  'tea-humic': { contrast: 1, opacity: 1 },
+}
+
+/**
+ * Sediment and algal turbidity each have a specific supporting study (the
+ * Lake Erie walleye citizen-science data); tea-humic doesn't get a floor
+ * because the brief explicitly withholds hue confidence there. A floor only
+ * ever raises confidence — `LIGHT_CONFIDENCE_CEILING` still gets the final
+ * say when it's also dark, since being unable to see fine hue distinctions
+ * doesn't stop mattering just because the water type is well-studied.
+ */
+export const TINT_CONFIDENCE_FLOOR: Partial<Record<WaterTint, EvidenceConfidence>> = {
+  sediment: 'moderate',
+  'green-algal': 'moderate',
+}
+
+/** Appended to the clarity rationale only when a specific tint adds real, citable information. */
+export const TINT_RATIONALE: Partial<Record<WaterTint, string>> = {
+  sediment: 'Sediment-tinted water specifically favors yellow/gold (Lake Erie walleye study).',
+  'green-algal':
+    'Algae-tinted water specifically favors dark silhouettes (Lake Erie walleye study; pike foraging research).',
+  'tea-humic':
+    'Tannin-stained water alters the underwater spectrum unpredictably — treat exact hue with extra caution here.',
 }

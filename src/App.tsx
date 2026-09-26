@@ -13,7 +13,7 @@ import type { SavedLocation } from './hooks/locationPreferences'
 import { useTemperatureUnit } from './hooks/useTemperatureUnit'
 import { median } from './weather/consensus'
 import type { NormalizedForecastPoint } from './weather/models'
-import { formatHourLabel } from './weather/time'
+import { findDailySunTimes, formatHourLabel } from './weather/time'
 
 function modelName(modelId: string): string {
   return MODEL_REGISTRY.find((m) => m.modelId === modelId)?.name ?? modelId
@@ -63,6 +63,7 @@ function App() {
           (() => {
             const current = forecast.series[forecast.selectedIndex]
             const isNow = forecast.selectedIndex === forecast.nowIndex
+            const sunTimes = findDailySunTimes(forecast.daily, current.timestamp)
             return (
               <>
                 <HourlyTimeline
@@ -79,6 +80,7 @@ function App() {
                   consensus={current.consensus}
                   agreement={current.agreement}
                   temperatureUnit={unit}
+                  sunset={sunTimes?.sunset ?? null}
                 />
                 <CollapsibleSection
                   summary={`Forecast models (${forecast.selectedModelIds.length})`}
@@ -92,7 +94,11 @@ function App() {
                     temperatureUnit={unit}
                   />
                 </CollapsibleSection>
-                <FishingCard {...summarizeLightInputs(current.modelsAtHour)} />
+                <FishingCard
+                  {...summarizeLightInputs(current.modelsAtHour)}
+                  timestamp={current.timestamp}
+                  sunTimes={sunTimes}
+                />
               </>
             )
           })()}

@@ -2,8 +2,11 @@ import { describe, expect, it } from 'vitest'
 import {
   dateOf,
   findCurrentHourIndex,
+  findDailySunTimes,
+  formatClockTime,
   formatDateLabel,
   formatHourLabel,
+  minutesOfDay,
   toLocalHourString,
   weekdayLabel,
 } from './time'
@@ -72,5 +75,41 @@ describe('formatDateLabel', () => {
 
   it('is stable across the hour, since only the calendar date matters', () => {
     expect(formatDateLabel('2026-09-06T00:00')).toBe(formatDateLabel('2026-09-06T23:00'))
+  })
+})
+
+describe('minutesOfDay', () => {
+  it('converts local time-of-day to minutes since midnight', () => {
+    expect(minutesOfDay('2026-09-06T00:00')).toBe(0)
+    expect(minutesOfDay('2026-09-06T06:48')).toBe(408)
+    expect(minutesOfDay('2026-09-06T23:59')).toBe(1439)
+  })
+})
+
+describe('formatClockTime', () => {
+  it('formats minute-precise 12-hour time, unlike formatHourLabel', () => {
+    expect(formatClockTime('2026-09-06T18:57')).toBe('6:57 PM')
+    expect(formatClockTime('2026-09-06T06:48')).toBe('6:48 AM')
+    expect(formatClockTime('2026-09-06T00:05')).toBe('12:05 AM')
+    expect(formatClockTime('2026-09-06T12:00')).toBe('12:00 PM')
+  })
+})
+
+describe('findDailySunTimes', () => {
+  const daily = [
+    { date: '2026-09-06', sunrise: '2026-09-06T06:48', sunset: '2026-09-06T18:57' },
+    { date: '2026-09-07', sunrise: '2026-09-07T06:49', sunset: '2026-09-07T18:56' },
+  ]
+
+  it("finds the entry matching the timestamp's calendar date, regardless of hour", () => {
+    expect(findDailySunTimes(daily, '2026-09-07T14:00')).toEqual(daily[1])
+  })
+
+  it('returns null when no entry covers that date', () => {
+    expect(findDailySunTimes(daily, '2026-09-09T14:00')).toBeNull()
+  })
+
+  it('returns null for an empty list', () => {
+    expect(findDailySunTimes([], '2026-09-07T14:00')).toBeNull()
   })
 })

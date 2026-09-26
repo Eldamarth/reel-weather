@@ -19,6 +19,12 @@ export interface OpenMeteoHourlyResponse {
     is_day?: Array<number | null>
     shortwave_radiation?: Array<number | null>
   }
+  /** Astronomy, not model-dependent — every model returns the same values. */
+  daily?: {
+    time: string[]
+    sunrise: string[]
+    sunset: string[]
+  }
 }
 
 function at(series: Array<number | null> | undefined, index: number): number | null {

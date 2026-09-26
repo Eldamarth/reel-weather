@@ -1,7 +1,7 @@
 import { mostDisagreementField } from '../weather/agreement'
 import { hazardMessage } from '../weather/hazards'
 import type { ConsensusPoint, ForecastAgreement } from '../weather/models'
-import { formatDateLabel } from '../weather/time'
+import { formatClockTime, formatDateLabel } from '../weather/time'
 import { formatTemperature, type TemperatureUnit } from '../weather/units'
 import { AgreementMeter } from './AgreementMeter'
 import { WeatherIcon } from './icons/WeatherIcon'
@@ -15,6 +15,8 @@ export interface ConsensusCardProps {
   consensus: ConsensusPoint
   agreement: ForecastAgreement
   temperatureUnit: TemperatureUnit
+  /** Sunset for the *selected* day (section 9's timeline can scroll ahead) — null when unavailable. */
+  sunset: string | null
 }
 
 /** Section 7.2: the large, visually dominant consensus card. */
@@ -25,6 +27,7 @@ export function ConsensusCard({
   consensus,
   agreement,
   temperatureUnit,
+  sunset,
 }: ConsensusCardProps) {
   const temp = formatTemperature(consensus.temperatureC, temperatureUnit)
   const wind = consensus.windSpeedKph != null ? `${Math.round(consensus.windSpeedKph)} km/h` : '—'
@@ -64,6 +67,12 @@ export function ConsensusCard({
           <span className={styles.statLabel}>Cloud</span>
           <span>☁️ {cloud}</span>
         </span>
+        {sunset && (
+          <span className={styles.stat}>
+            <span className={styles.statLabel}>Sunset</span>
+            <span>🌇 {formatClockTime(sunset)}</span>
+          </span>
+        )}
       </div>
 
       <AgreementMeter overall={agreement.overall} />

@@ -1,3 +1,5 @@
+import type { DailySunTimes } from './models'
+
 /**
  * Section 8.4: forecast timestamps are naive local strings in the location's
  * own timezone (no UTC offset), so matching "now" against them means
@@ -65,7 +67,7 @@ export function weekdayLabel(timestamp: string): string {
 /**
  * "Tue, Sep 8" — for display anywhere a selected hour could be days ahead
  * (section 9's timeline scrolls the full fetched range), so the header can't
- * rely on the viewer already knowing what day is being shown. Not yet implemented.
+ * rely on the viewer already knowing what day is being shown.
  */
 export function formatDateLabel(timestamp: string): string {
   const [year, month, day] = dateOf(timestamp).split('-').map(Number)
@@ -74,4 +76,26 @@ export function formatDateLabel(timestamp: string): string {
     month: 'short',
     day: 'numeric',
   })
+}
+
+/** Minutes since local midnight — string slicing, same reasoning as the other helpers here. */
+export function minutesOfDay(timestamp: string): number {
+  const hour = Number(timestamp.slice(11, 13))
+  const minute = Number(timestamp.slice(14, 16))
+  return hour * 60 + minute
+}
+
+/** "6:57 PM" — minute-precise, unlike formatHourLabel (hourly forecast slots are always :00; sunrise/sunset aren't). */
+export function formatClockTime(timestamp: string): string {
+  const hour = Number(timestamp.slice(11, 13))
+  const minute = timestamp.slice(14, 16)
+  const period = hour >= 12 ? 'PM' : 'AM'
+  const hour12 = hour % 12 === 0 ? 12 : hour % 12
+  return `${hour12}:${minute} ${period}`
+}
+
+/** Matches a timestamp to its calendar date's sunrise/sunset — the timeline can scroll to any fetched day, so this is never assumed to be "today". */
+export function findDailySunTimes(daily: DailySunTimes[], timestamp: string): DailySunTimes | null {
+  const date = dateOf(timestamp)
+  return daily.find((d) => d.date === date) ?? null
 }

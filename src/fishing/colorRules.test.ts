@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { adjustLevel, downgradeConfidence, strategyProfile } from './colorRules'
+import {
+  adjustLevel,
+  downgradeConfidence,
+  raiseConfidenceFloor,
+  strategyProfile,
+} from './colorRules'
 
 describe('adjustLevel', () => {
   it('steps up and down within range', () => {
@@ -41,5 +46,19 @@ describe('downgradeConfidence', () => {
 
   it('never raises confidence above what the input already was', () => {
     expect(downgradeConfidence('low', 'moderate')).toBe('low')
+  })
+})
+
+describe('raiseConfidenceFloor', () => {
+  it('keeps the original confidence when there is no floor', () => {
+    expect(raiseConfidenceFloor('low', undefined)).toBe('low')
+  })
+
+  it('raises confidence up to the floor when the floor is higher', () => {
+    expect(raiseConfidenceFloor('low', 'moderate')).toBe('moderate')
+  })
+
+  it('never lowers confidence below what the input already was', () => {
+    expect(raiseConfidenceFloor('high', 'moderate')).toBe('high')
   })
 })

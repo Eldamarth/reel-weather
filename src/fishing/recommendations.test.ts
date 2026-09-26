@@ -70,6 +70,67 @@ describe('recommendLureVisualStrategy', () => {
       }
     }
   })
+
+  it('defaults to unspecified tint, which changes nothing from the tint-less call', () => {
+    const withDefault = recommendLureVisualStrategy('murky', 'moderate')
+    const explicit = recommendLureVisualStrategy('murky', 'moderate', 'unspecified')
+    expect(explicit).toEqual(withDefault)
+  })
+
+  it("green-algal tint raises confidence without changing strategy or colors (murky's dark-silhouette baseline is already maxed on every property)", () => {
+    const base = recommendLureVisualStrategy('murky', 'moderate')
+    const tinted = recommendLureVisualStrategy('murky', 'moderate', 'green-algal')
+
+    expect(tinted.primaryStrategy).toBe(base.primaryStrategy)
+    expect(tinted.exampleColors).toEqual(base.exampleColors)
+    expect(tinted.properties).toEqual(base.properties)
+    expect(base.confidence).toBe('low')
+    expect(tinted.confidence).toBe('moderate')
+    expect(tinted.rationale).toMatch(/algae-tinted/i)
+  })
+
+  it("green-algal's silhouette modifier does have room to act on a strategy that isn't already maxed", () => {
+    const base = recommendLureVisualStrategy('stained', 'moderate')
+    const tinted = recommendLureVisualStrategy('stained', 'moderate', 'green-algal')
+    expect(tinted.properties.silhouette).not.toBe(base.properties.silhouette)
+  })
+
+  it('tea-humic tint raises opacity (contrast is already maxed for the "contrast" strategy) but does not touch confidence', () => {
+    const base = recommendLureVisualStrategy('stained', 'moderate')
+    const tinted = recommendLureVisualStrategy('stained', 'moderate', 'tea-humic')
+
+    expect(tinted.properties.opacity).not.toBe(base.properties.opacity)
+    expect(tinted.properties.contrast).toBe(base.properties.contrast) // already at ceiling
+    expect(tinted.confidence).toBe(base.confidence)
+    expect(tinted.rationale).toMatch(/tannin-stained/i)
+  })
+
+  it('sediment tint raises confidence without changing any property', () => {
+    const base = recommendLureVisualStrategy('stained', 'moderate')
+    const tinted = recommendLureVisualStrategy('stained', 'moderate', 'sediment')
+
+    expect(tinted.properties).toEqual(base.properties)
+    expect(tinted.confidence).toBe('moderate')
+  })
+
+  it('a tint confidence floor still loses to dark/low light — night keeps the final say', () => {
+    const tinted = recommendLureVisualStrategy('murky', 'dark', 'green-algal')
+    expect(tinted.confidence).toBe('low')
+  })
+
+  it('covers every clarity/light/tint combination without throwing', () => {
+    const clarities: WaterClarityInput[] = ['clear', 'stained', 'murky']
+    const lights = ['bright', 'moderate', 'low', 'dark'] as const
+    const tints: WaterTintInput[] = ['unspecified', 'sediment', 'green-algal', 'tea-humic']
+    for (const clarity of clarities) {
+      for (const light of lights) {
+        for (const tint of tints) {
+          expect(() => recommendLureVisualStrategy(clarity, light, tint)).not.toThrow()
+        }
+      }
+    }
+  })
 })
 
 type WaterClarityInput = Parameters<typeof recommendLureVisualStrategy>[0]
+type WaterTintInput = Parameters<typeof recommendLureVisualStrategy>[2]

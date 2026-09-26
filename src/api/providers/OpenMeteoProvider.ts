@@ -1,4 +1,5 @@
 import { normalizeOpenMeteoResponse, type OpenMeteoHourlyResponse } from '../../weather/normalize'
+import type { DailySunTimes } from '../../weather/models'
 import type { ForecastProvider, ForecastRequest, NormalizedForecast } from './ForecastProvider'
 
 const HOURLY_VARIABLES = [
@@ -24,10 +25,22 @@ function buildUrl(request: ForecastRequest, modelId: string): string {
   url.searchParams.set('latitude', String(request.location.latitude))
   url.searchParams.set('longitude', String(request.location.longitude))
   url.searchParams.set('hourly', HOURLY_VARIABLES)
+  url.searchParams.set('daily', 'sunrise,sunset')
   url.searchParams.set('forecast_days', String(request.forecastDays ?? DEFAULT_FORECAST_DAYS))
   url.searchParams.set('timezone', 'auto')
   url.searchParams.set('models', modelId)
   return url.toString()
+}
+
+/** Sunrise/sunset is pure astronomy, identical across every model — only needed from whichever model succeeds first. */
+function extractDaily(response: OpenMeteoHourlyResponse): DailySunTimes[] {
+  const daily = response.daily
+  if (!daily) return []
+  return daily.time.map((date, i) => ({
+    date,
+    sunrise: daily.sunrise[i],
+    sunset: daily.sunset[i],
+  }))
 }
 
 type ModelFetchResult =
@@ -75,6 +88,7 @@ export const openMeteoProvider: ForecastProvider = {
     const byModel: Record<string, ReturnType<typeof normalizeOpenMeteoResponse>> = {}
     const unavailableModels: string[] = []
     let timezone: string | null = null
+    let daily: DailySunTimes[] = []
 
     for (const result of results) {
       if (!result.ok) {
@@ -82,6 +96,7 @@ export const openMeteoProvider: ForecastProvider = {
         continue
       }
       timezone ??= result.response.timezone
+      if (daily.length === 0) daily = extractDaily(result.response)
       byModel[result.modelId] = normalizeOpenMeteoResponse(
         result.response,
         result.modelId,
@@ -94,6 +109,7 @@ export const openMeteoProvider: ForecastProvider = {
       timezone: timezone ?? 'UTC',
       byModel,
       unavailableModels,
+      daily,
     }
   },
 }

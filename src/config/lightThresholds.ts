@@ -11,3 +11,10 @@ export const LOW_LIGHT_RADIATION_WM2 = 50
 
 /** Below this cloud cover, daytime with adequate radiation counts as "bright" rather than "moderate". */
 export const BRIGHT_CLOUD_COVER_MAX_PCT = 30
+
+/**
+ * Golden-hour window around actual sunrise/sunset, in minutes. Preferred
+ * over the radiation proxy above when real sun times are available (section
+ * 21 open question #7) — this is precise where the proxy was a heuristic.
+ */
+export const GOLDEN_HOUR_WINDOW_MINUTES = 45

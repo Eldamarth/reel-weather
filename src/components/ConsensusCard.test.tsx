@@ -19,6 +19,7 @@ describe('ConsensusCard', () => {
         consensus={consensus}
         agreement={agreement}
         temperatureUnit="celsius"
+        sunset="2026-09-06T18:57"
       />,
     )
 
@@ -33,6 +34,28 @@ describe('ConsensusCard', () => {
     expect(screen.getByText('Precip')).toBeInTheDocument()
     expect(screen.getByText('Wind')).toBeInTheDocument()
     expect(screen.getByText('Cloud')).toBeInTheDocument()
+    expect(screen.getByText('Sunset')).toBeInTheDocument()
+    expect(screen.getByText('6:57 PM', { exact: false })).toBeInTheDocument()
+  })
+
+  it('omits the sunset stat entirely when it is unavailable, rather than showing a placeholder', () => {
+    const models = ['a', 'b', 'c'].map((id) => makeModel({ modelId: id, temperatureC: 20 }))
+    const consensus = buildConsensusPoint(models, ['a', 'b', 'c'], '2026-09-06T12:00')
+    const agreement = calculateForecastAgreement(models)
+
+    render(
+      <ConsensusCard
+        locationName="Boulder, CO"
+        timezone="America/Denver"
+        timeLabel="NOW"
+        consensus={consensus}
+        agreement={agreement}
+        temperatureUnit="celsius"
+        sunset={null}
+      />,
+    )
+
+    expect(screen.queryByText('Sunset')).not.toBeInTheDocument()
   })
 
   it('renders in Fahrenheit when that is the selected unit', () => {
@@ -48,6 +71,7 @@ describe('ConsensusCard', () => {
         consensus={consensus}
         agreement={agreement}
         temperatureUnit="fahrenheit"
+        sunset={null}
       />,
     )
 
@@ -72,6 +96,7 @@ describe('ConsensusCard', () => {
         consensus={consensus}
         agreement={agreement}
         temperatureUnit="fahrenheit"
+        sunset={null}
       />,
     )
 

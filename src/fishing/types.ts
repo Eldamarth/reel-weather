@@ -2,6 +2,18 @@
 export type WaterClarity = 'clear' | 'stained' | 'murky'
 
 /**
+ * Optional refinement of clarity (brief section 6/11/14): equally "murky"
+ * waters can have very different spectral environments, and turbidity type —
+ * not just amount — is one of the brief's higher-confidence findings
+ * (Lake Erie walleye: sediment vs. algal turbidity favored different colors).
+ * Simplified from the brief's sketched type, which also had a separate
+ * `neutral` state — dropped here since it would behave identically to
+ * `unspecified` in V1 and the brief's own UI mockup (section 14) only shows
+ * four buttons. Never required for normal use — defaults to `unspecified`.
+ */
+export type WaterTint = 'unspecified' | 'sediment' | 'green-algal' | 'tea-humic'
+
+/**
  * A small, general visual-strategy vocabulary — water clarity picks one (or,
  * for murky, two) of these; it is not itself a color. This is the seam for a
  * later scoring engine: strategies stay the same, only how they're chosen

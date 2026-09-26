@@ -106,6 +106,19 @@ export interface HourlyForecast {
   modelsAtHour: Record<string, NormalizedForecastPoint>
 }
 
+/**
+ * Sunrise/sunset for one calendar date. Pure astronomy, not a model
+ * prediction — every model returns the same value, so this lives once per
+ * day, not per model. Lives at the shared weather layer (not inside
+ * fishing/) since it's a general environmental signal other features will
+ * likely want too, not a fishing-specific concern.
+ */
+export interface DailySunTimes {
+  date: string
+  sunrise: string
+  sunset: string
+}
+
 /** Section 3.2. */
 export type ModelType = 'direct-nwp' | 'blend' | 'ensemble-mean'
 

@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import type { ForecastProvider, NormalizedForecast } from '../api/providers/ForecastProvider'
 import { makeModel } from '../weather/fixtures'
+import { dateOf } from '../weather/time'
 import { useForecast } from './useForecast'
 
 const BOULDER = { latitude: 40.015, longitude: -105.2705 }
@@ -42,6 +43,7 @@ describe('useForecast', () => {
       byModel: {
         model_a: [makeModel({ modelId: 'model_a', timestamp: nowIso(), temperatureC: 20 })],
       },
+      daily: [{ date: dateOf(nowIso()), sunrise: '00:00', sunset: '00:00' }],
     })
 
     const { result } = renderHook(() => useForecast(BOULDER, provider))
@@ -53,6 +55,7 @@ describe('useForecast', () => {
     expect(result.current.nowIndex).toBe(0)
     expect(result.current.series[result.current.selectedIndex].consensus.temperatureC).toBe(20)
     expect(result.current.timezone).toBe('UTC')
+    expect(result.current.daily).toHaveLength(1)
   })
 
   it('setSelectedIndex moves the selection without re-fetching', async () => {
@@ -66,6 +69,7 @@ describe('useForecast', () => {
           makeModel({ modelId: 'model_a', timestamp: '2099-01-01T00:00', temperatureC: 30 }),
         ],
       },
+      daily: [],
     }))
     const provider: ForecastProvider = { id: 'fake', name: 'Fake', getForecast }
 
@@ -98,6 +102,7 @@ describe('useForecast', () => {
       timezone: 'UTC',
       unavailableModels: ['model_a'],
       byModel: {},
+      daily: [],
     })
     const { result } = renderHook(() => useForecast(BOULDER, provider))
     await waitFor(() => expect(result.current.status).toBe('error'))

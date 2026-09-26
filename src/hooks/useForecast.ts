@@ -3,7 +3,7 @@ import { openMeteoProvider } from '../api/providers/OpenMeteoProvider'
 import type { ForecastProvider } from '../api/providers/ForecastProvider'
 import { buildHourlySeries } from '../weather/consensus'
 import { selectModels } from '../weather/modelSelection'
-import type { GeoCoordinates, HourlyForecast } from '../weather/models'
+import type { DailySunTimes, GeoCoordinates, HourlyForecast } from '../weather/models'
 import { findCurrentHourIndex, toLocalHourString } from '../weather/time'
 
 type FetchState =
@@ -15,6 +15,7 @@ type FetchState =
       series: HourlyForecast[]
       nowIndex: number
       selectedModelIds: string[]
+      daily: DailySunTimes[]
     }
   | { status: 'error'; message: string }
 
@@ -29,6 +30,7 @@ export type UseForecastResult =
       setSelectedIndex: (index: number) => void
       nowIndex: number
       selectedModelIds: string[]
+      daily: DailySunTimes[]
     }
   | { status: 'error'; message: string }
 
@@ -81,6 +83,7 @@ export function useForecast(
           series,
           nowIndex,
           selectedModelIds,
+          daily: forecast.daily,
         })
         setSelectedIndex(nowIndex)
       })

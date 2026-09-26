@@ -27,3 +27,12 @@ export function downgradeConfidence(
   if (!ceiling) return confidence
   return CONFIDENCE_RANK[ceiling] < CONFIDENCE_RANK[confidence] ? ceiling : confidence
 }
+
+/** Raises confidence up to `floor` if lower — never lowers it. A specific, well-studied water tint can justify more confidence than clarity alone gives. */
+export function raiseConfidenceFloor(
+  confidence: EvidenceConfidence,
+  floor: EvidenceConfidence | undefined,
+): EvidenceConfidence {
+  if (!floor) return confidence
+  return CONFIDENCE_RANK[floor] > CONFIDENCE_RANK[confidence] ? floor : confidence
+}
