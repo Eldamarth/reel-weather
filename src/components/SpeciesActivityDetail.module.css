@@ -1,0 +1,116 @@
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.back {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border: none;
+  background: transparent;
+  color: var(--color-accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.name {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.scientific {
+  margin: -6px 0 0;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+.currentWindow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.currentLabel {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.currentLevel {
+  font-size: var(--font-size-heading);
+  font-weight: 700;
+}
+
+.scoreBar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.scoreFill {
+  height: 100%;
+  background: var(--color-accent);
+}
+
+.strongestWindow {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.sectionHeading {
+  margin: var(--space-1) 0 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.reasons {
+  margin: 0;
+  padding-left: 1.2em;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.9rem;
+}
+
+.confidence {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.optionalInputs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border-top: 1px solid var(--color-surface);
+  padding-top: var(--space-2);
+}
+
+.label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-1);
+}
+
+.cautions {
+  margin: 0;
+  padding-left: 1.2em;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.disclaimer {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}

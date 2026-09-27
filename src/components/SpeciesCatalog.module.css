@@ -1,0 +1,35 @@
+.catalog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.intro {
+  margin: 0;
+  font-weight: 600;
+}
+
+.search {
+  min-height: 44px;
+  padding: var(--space-2);
+  border: 1px solid var(--color-surface);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.disclaimer {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-2);
+}
+
+.empty {
+  color: var(--color-text-muted);
+}

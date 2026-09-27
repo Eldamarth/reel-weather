@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { AttributionFooter } from './components/AttributionFooter'
 import { CollapsibleSection } from './components/CollapsibleSection'
 import { ConsensusCard } from './components/ConsensusCard'
+import { FishActivityView } from './components/FishActivityView'
 import { FishingCard } from './components/FishingCard'
 import { HourlyTimeline } from './components/HourlyTimeline'
 import { LocationPicker } from './components/LocationPicker'
 import { ModelForecastList } from './components/ModelForecastList'
 import { TemperatureUnitToggle } from './components/TemperatureUnitToggle'
+import { ViewSwitcher, type AppView } from './components/ViewSwitcher'
 import { MODEL_REGISTRY } from './config/modelRegistry'
 import { useForecast } from './hooks/useForecast'
 import type { SavedLocation } from './hooks/locationPreferences'
@@ -33,6 +35,7 @@ function App() {
   const [location, setLocation] = useState<SavedLocation | null>(null)
   const forecast = useForecast(location)
   const { unit, setUnit } = useTemperatureUnit()
+  const [view, setView] = useState<AppView>('forecast')
 
   return (
     <>
@@ -48,6 +51,7 @@ function App() {
       >
         <TemperatureUnitToggle unit={unit} onChange={setUnit} />
         <LocationPicker onLocationSelected={setLocation} />
+        <ViewSwitcher value={view} onChange={setView} />
 
         {forecast.status === 'loading' && (
           <p style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>Loading forecast…</p>
@@ -64,6 +68,19 @@ function App() {
             const current = forecast.series[forecast.selectedIndex]
             const isNow = forecast.selectedIndex === forecast.nowIndex
             const sunTimes = findDailySunTimes(forecast.daily, current.timestamp)
+
+            if (view === 'fish-activity') {
+              return (
+                <FishActivityView
+                  coordinates={location}
+                  timestamp={current.timestamp}
+                  daily={forecast.daily}
+                  series={forecast.series}
+                  sunset={sunTimes?.sunset ?? null}
+                />
+              )
+            }
+
             return (
               <>
                 <HourlyTimeline

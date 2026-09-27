@@ -75,4 +75,24 @@ describe('App', () => {
 
     expect((await screen.findAllByText('20°C', { exact: false })).length).toBeGreaterThan(0)
   })
+
+  it('preserves the selected location/forecast when switching to Fish Activity and back (design brief section 3)', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.type(screen.getByPlaceholderText('Search for a place...'), 'Boulder')
+    await user.click(await screen.findByRole('button', { name: /Boulder/ }))
+    expect(await screen.findByText('Consensus from', { exact: false })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('radio', { name: 'Fish Activity' }))
+    expect(screen.getByText('What would this species be doing here today?')).toBeInTheDocument()
+    expect(screen.queryByText('Consensus from', { exact: false })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('radio', { name: 'Forecast' }))
+
+    // Back on the Forecast view with no new location search required — the
+    // same location/forecast state that was already loaded is still there.
+    expect(screen.getByText('Consensus from', { exact: false })).toBeInTheDocument()
+    expect(screen.getAllByText('Boulder', { exact: false }).length).toBeGreaterThan(0)
+  })
 })
