@@ -9,6 +9,12 @@ import {
 } from './catalog'
 import { resolveEvidence } from './evidence'
 
+describe('SPECIES_PROFILES', () => {
+  it('contains all thirteen researched profiles, production-ready or not', () => {
+    expect(SPECIES_PROFILES).toHaveLength(13)
+  })
+})
+
 describe('SPECIES_CATALOG', () => {
   it('contains all twelve production-ready species (batches 1-3), excluding the research-only Channel Catfish', () => {
     expect(SPECIES_CATALOG).toHaveLength(12)
@@ -72,8 +78,35 @@ describe('findProfile', () => {
     expect(findProfile('tench', undefined)?.displayName).toBe('Tench')
   })
 
+  it('finds a batch-3 species (Yellow Perch) by id with no variant', () => {
+    expect(findProfile('yellow-perch', undefined)?.displayName).toBe('Yellow Perch')
+  })
+
   it('returns undefined for an unknown species', () => {
     expect(findProfile('unknown-species', undefined)).toBeUndefined()
+  })
+})
+
+describe('Channel Catfish (research-only, not yet production-ready)', () => {
+  const catfish = findProfile('channel-catfish', undefined)
+
+  it('exists in the research/profile registry', () => {
+    expect(catfish).toBeDefined()
+    expect(catfish?.displayName).toBe('Channel Catfish')
+  })
+
+  it('is explicitly marked productionReady: false', () => {
+    expect(catfish?.productionReady).toBe(false)
+  })
+
+  it('has fully resolvable evidence, exactly like a production-ready profile', () => {
+    expect(catfish).toBeDefined()
+    expect(() => resolveEvidence(catfish!.evidenceIds, EVIDENCE_INDEX)).not.toThrow()
+    expect(catfish!.evidenceIds.length).toBeGreaterThan(0)
+  })
+
+  it('does not appear in SPECIES_CATALOG', () => {
+    expect(SPECIES_CATALOG.some((entry) => entry.speciesId === 'channel-catfish')).toBe(false)
   })
 })
 

@@ -8,13 +8,18 @@ import type { ActivitySpeciesProfile, EvidenceRecord } from '../types'
 export const SMALLMOUTH_BASS_EVIDENCE: EvidenceRecord[] = [
   {
     id: 'smallmouth-wolf-2026-great-lakes',
-    citation: 'Wolf, P.H. et al. (2026). Activity and metabolic rate of free-swimming smallmouth bass (Micropterus dolomieu) in large, interconnected ecosystems.',
+    citation:
+      'Wolf, P.H. et al. (2026). Activity and metabolic rate of free-swimming smallmouth bass (Micropterus dolomieu) in large, interconnected ecosystems.',
     year: 2026,
     doi: '10.1186/s40317-026-00455-3',
     url: 'https://link.springer.com/article/10.1186/s40317-026-00455-3',
     speciesId: 'smallmouth-bass',
     evidenceType: 'accelerometry',
-    population: { location: 'Eastern Lake Ontario and upper/middle St. Lawrence River, Canada/USA', habitat: 'multiple', lifeStage: 'adult' },
+    population: {
+      location: 'Eastern Lake Ontario and upper/middle St. Lawrence River, Canada/USA',
+      habitat: 'multiple',
+      lifeStage: 'adult',
+    },
     study: {
       method: 'Multi-year acoustic telemetry with tri-axial accelerometer transmitters',
       duration: 'August 2021-August 2024 activity dataset',
@@ -22,15 +27,20 @@ export const SMALLMOUTH_BASS_EVIDENCE: EvidenceRecord[] = [
     },
     variables: ['time-of-day', 'season', 'habitat-type', 'flow', 'water-temperature'],
     finding: {
-      summary: 'Activity generally increased through morning, peaked from late morning into early afternoon, and declined through evening; crepuscular structure was evident, especially in summer. Winter activity remained consistently low with the weakest diel cycle.',
+      summary:
+        'Activity generally increased through morning, peaked from late morning into early afternoon, and declined through evening; crepuscular structure was evident, especially in summer. Winter activity remained consistently low with the weakest diel cycle.',
       direction: 'peak',
     },
     applicability: 'high',
-    limitations: ['Activity patterns varied among lake and river habitats.', 'Acceleration is not direct feeding or catchability.'],
+    limitations: [
+      'Activity patterns varied among lake and river habitats.',
+      'Acceleration is not direct feeding or catchability.',
+    ],
   },
   {
     id: 'smallmouth-todd-rabeni-1989-stream',
-    citation: 'Todd, B.L. & Rabeni, C.F. (1989). Movement and Habitat Use by Stream-Dwelling Smallmouth Bass.',
+    citation:
+      'Todd, B.L. & Rabeni, C.F. (1989). Movement and Habitat Use by Stream-Dwelling Smallmouth Bass.',
     year: 1989,
     url: 'https://academic.oup.com/tafs/article-abstract/118/3/229/7891663',
     speciesId: 'smallmouth-bass',
@@ -39,29 +49,42 @@ export const SMALLMOUTH_BASS_EVIDENCE: EvidenceRecord[] = [
     study: { method: 'Radio telemetry with 24-h observations in all seasons' },
     variables: ['time-of-day', 'season', 'water-temperature', 'cover', 'flow'],
     finding: {
-      summary: 'Intrapool movement peaked shortly after sunrise and again after sunset in all seasons. Average daily movement increased from about 120 m/day at 4°C to about 980 m/day at 27.5°C. Habitat use shifted between day/night and warm/cool seasons.',
+      summary:
+        'Intrapool movement peaked shortly after sunrise and again after sunset in all seasons. Average daily movement increased from about 120 m/day at 4°C to about 980 m/day at 27.5°C. Habitat use shifted between day/night and warm/cool seasons.',
       direction: 'peak',
     },
     applicability: 'high',
-    limitations: ['Stream population; lentic populations may differ.', 'Movement-distance relationship is not a direct catchability curve.'],
+    limitations: [
+      'Stream population; lentic populations may differ.',
+      'Movement-distance relationship is not a direct catchability curve.',
+    ],
   },
   {
     id: 'smallmouth-kwak-1995-feeding',
-    citation: 'Kwak, T.J. et al. (1995). Diel Feeding Chronology of Six Fish Species in the Juniata River, Pennsylvania.',
+    citation:
+      'Kwak, T.J. et al. (1995). Diel Feeding Chronology of Six Fish Species in the Juniata River, Pennsylvania.',
     year: 1995,
     doi: '10.1080/02705060.1995.9663412',
     url: 'https://www.tandfonline.com/doi/full/10.1080/02705060.1995.9663412',
     speciesId: 'smallmouth-bass',
     evidenceType: 'feeding',
-    population: { location: 'Juniata River, Pennsylvania, USA', habitat: 'river', lifeStage: 'mixed' },
+    population: {
+      location: 'Juniata River, Pennsylvania, USA',
+      habitat: 'river',
+      lifeStage: 'mixed',
+    },
     study: { method: 'Stomach-content sampling across six 4-h intervals over 24 h' },
     variables: ['time-of-day', 'feeding-intensity', 'diet-composition'],
     finding: {
-      summary: 'Smallmouth Bass exhibited a diurnal feeding peak; the study documented strong diel variation in feeding chronology across the fish assemblage.',
+      summary:
+        'Smallmouth Bass exhibited a diurnal feeding peak; the study documented strong diel variation in feeding chronology across the fish assemblage.',
       direction: 'peak',
     },
     applicability: 'high',
-    limitations: ['One river system.', 'Stomach-content chronology is not direct lure catchability.'],
+    limitations: [
+      'One river system.',
+      'Stomach-content chronology is not direct lure catchability.',
+    ],
   },
 ]
 
@@ -153,7 +176,8 @@ export const SMALLMOUTH_BASS_PROFILE: ActivitySpeciesProfile = {
       confidence: 'strong',
       evidenceIds: ['smallmouth-wolf-2026-great-lakes', 'smallmouth-todd-rabeni-1989-stream'],
       condition: {},
-      message: 'Smallmouth Bass diel and seasonal activity varies with habitat type and flow; the Lake Ontario and St. Lawrence populations did not behave identically.',
+      message:
+        'Smallmouth Bass diel and seasonal activity varies with habitat type and flow; the Lake Ontario and St. Lawrence populations did not behave identically.',
     },
     {
       id: 'smallmouth-temperature-movement-context',
@@ -162,11 +186,16 @@ export const SMALLMOUTH_BASS_PROFILE: ActivitySpeciesProfile = {
       confidence: 'moderate',
       evidenceIds: ['smallmouth-todd-rabeni-1989-stream', 'smallmouth-wolf-2026-great-lakes'],
       condition: {},
-      message: 'Movement and metabolic activity increase greatly from winter into warm seasons, but the reviewed studies do not justify a universal numeric bite-temperature optimum.',
+      message:
+        'Movement and metabolic activity increase greatly from winter into warm seasons, but the reviewed studies do not justify a universal numeric bite-temperature optimum.',
     },
   ],
 
-  evidenceIds: ['smallmouth-wolf-2026-great-lakes', 'smallmouth-todd-rabeni-1989-stream', 'smallmouth-kwak-1995-feeding'],
+  evidenceIds: [
+    'smallmouth-wolf-2026-great-lakes',
+    'smallmouth-todd-rabeni-1989-stream',
+    'smallmouth-kwak-1995-feeding',
+  ],
 
   cautions: [
     'Lake and river populations can differ materially in activity amplitude and timing.',
